@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://prod-db-host:5432/library_db
+    username: prod_user
+    password: prod_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
