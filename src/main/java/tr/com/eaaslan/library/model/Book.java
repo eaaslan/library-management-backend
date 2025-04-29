@@ -66,8 +66,7 @@ public class Book extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Book)) return false;
-        Book book = (Book) o;
+        if (!(o instanceof Book book)) return false;
         return isbn != null && isbn.equals(book.isbn);
     }
 
