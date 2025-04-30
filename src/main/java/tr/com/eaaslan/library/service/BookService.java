@@ -3,30 +3,33 @@ package tr.com.eaaslan.library.service;
 import org.springframework.stereotype.Service;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
+import tr.com.eaaslan.library.model.dto.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.BookResponse;
+import tr.com.eaaslan.library.model.dto.BookUpdateRequest;
 import tr.com.eaaslan.library.repository.BookRepository;
 
 import java.util.List;
 
 public interface BookService {
 
-    Book createBook(Book book);
+    BookResponse createBook(BookCreateRequest book);
 
-    Book getBookById(Long id);
+    BookResponse getBookById(Long id);
 
-    Book getBookByIsbn(String isbn);
+    BookResponse getBookByIsbn(String isbn);
 
-    List<Book> getAllBooks(int page, int size, String sortBy);
+    List<BookResponse> getAllBooks(int page, int size, String sortBy);
 
-    Book updateBook(Long id, Book book);
+    BookResponse updateBook(Long id, BookUpdateRequest bookUpdateRequest);
 
-    void deleteBook(Long id);
+    BookResponse deleteBook(Long id);
 
-    List<Book> searchBooksByTitle(String title, int page, int size);
+    List<BookResponse> searchBooksByTitle(String title, int page, int size);
 
-    List<Book> searchBooksByAuthor(String author, int page, int size);
+    List<BookResponse> searchBooksByAuthor(String author, int page, int size);
 
-    List<Book> searchBooksByGenre(Genre genre, int page, int size);
+    List<BookResponse> searchBooksByGenre(Genre genre, int page, int size);
 
-    List<Book> getAvailableBooks();
+    List<BookResponse> getAvailableBooks();
 }
 
