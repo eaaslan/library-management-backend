@@ -77,12 +77,10 @@ public class Book extends BaseEntity {
     @Override
     public String toString() {
         return "Book{" +
-                "id=" + getId() +
                 ", isbn='" + isbn + '\'' +
                 ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 '}';
     }
-
 
 }

@@ -1,6 +1,7 @@
 package tr.com.eaaslan.library.service;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +19,10 @@ import tr.com.eaaslan.library.repository.BookRepository;
 import java.util.List;
 
 @Service
-@Slf4j
+
 public class BookServiceImpl implements BookService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
 
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
