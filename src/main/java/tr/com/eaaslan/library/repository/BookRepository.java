@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
+import tr.com.eaaslan.library.model.dto.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.BookResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +25,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findByGenre(Genre genre, Pageable pageable);
 
     List<Book> findAllByAvailableTrue();
+
+    Optional<Book> getBooksById(Long id);
 }
