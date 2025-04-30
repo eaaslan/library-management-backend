@@ -2,11 +2,8 @@ package tr.com.eaaslan.library.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDate;
 import java.time.Year;
 
 @Entity
@@ -17,6 +14,8 @@ import java.time.Year;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Book extends BaseEntity {
 
     @Column(name = "isbn", unique = true, nullable = false)
