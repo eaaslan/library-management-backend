@@ -64,8 +64,9 @@ class BookRepositoryTest {
     @Test
     @DisplayName("Should find available books")
     void shouldFindAvailableBooks() {
-        List<Book> books = bookRepository.findAllByAvailableTrue();
-        assertEquals(BookTestData.getAvailableBooks().size(), books.size());
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Book> books = bookRepository.findAllByAvailableTrue(pageable);
+        assertEquals(BookTestData.getAvailableBooks().size(), books.getTotalElements());
     }
 
     @Test

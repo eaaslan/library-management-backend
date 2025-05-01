@@ -24,7 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Page<Book> findByGenre(Genre genre, Pageable pageable);
 
-    List<Book> findAllByAvailableTrue();
+    Page<Book> findAllByAvailableTrue(Pageable pageable);
 
     Optional<Book> getBooksById(Long id);
 }

@@ -110,17 +110,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookResponse> searchBooksByGenre(Genre genre, int page, int size) {
+    public List<BookResponse> searchBooksByGenre(String genre, int page, int size) {
         log.info("Searching books by genre: {}", genre);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Book> bookPage = bookRepository.findByGenre(genre, pageable);
+        Genre genreEnum = Genre.valueOf(genre.toUpperCase());
+        Page<Book> bookPage = bookRepository.findByGenre(genreEnum, pageable);
         return bookPage.getContent().stream().map(bookMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookResponse> getAvailableBooks() {
+    public Page<BookResponse> getAvailableBooks(int page, int size) {
         log.info("Fetching available books");
-        return bookRepository.findAllByAvailableTrue().stream().map(bookMapper::toResponse).toList();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findAllByAvailableTrue(pageable);
+        return bookPage.map(bookMapper::toResponse);
     }
 }

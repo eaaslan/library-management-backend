@@ -1,5 +1,6 @@
 package tr.com.eaaslan.library.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
@@ -28,8 +29,8 @@ public interface BookService {
 
     List<BookResponse> searchBooksByAuthor(String author, int page, int size);
 
-    List<BookResponse> searchBooksByGenre(Genre genre, int page, int size);
+    List<BookResponse> searchBooksByGenre(String genre, int page, int size);
 
-    List<BookResponse> getAvailableBooks();
+    Page<BookResponse> getAvailableBooks(int page, int size);
 }
 
