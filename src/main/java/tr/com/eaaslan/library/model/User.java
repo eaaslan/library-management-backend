@@ -39,10 +39,10 @@ public class User extends BaseEntity {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @Column(nullable = false, name = "phone")
+    @Column(nullable = false, name = "phone_number")
     @NotBlank(message = "Phone is required")
     @Pattern(regexp = "^(0|\\+90)?5[0-9]{9}$", message = "Please enter a valid Turkish mobile phone number")
-    private String phone;
+    private String phoneNumber;
 
     @Column(nullable = false, name = "role")
     @Enumerated(EnumType.STRING)

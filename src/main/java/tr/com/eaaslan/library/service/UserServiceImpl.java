@@ -4,8 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 import tr.com.eaaslan.library.model.User;
 import tr.com.eaaslan.library.model.UserRole;
+import tr.com.eaaslan.library.model.UserStatus;
 import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
 import tr.com.eaaslan.library.model.dto.user.UserResponse;
 import tr.com.eaaslan.library.model.dto.user.UserUpdateRequest;
@@ -13,6 +15,7 @@ import tr.com.eaaslan.library.model.mapper.UserMapper;
 import tr.com.eaaslan.library.repository.UserRepository;
 
 
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -42,11 +45,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    @Override
-    public UserResponse getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        return userMapper.toResponse(user);
-    }
 
     @Override
     public Page<UserResponse> getAllUsers(int page, int size, String sortBy) {
@@ -91,7 +89,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserResponse> getActiveUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findAllByActive(true, pageable);
+        Page<User> userPage = userRepository.findAllByStatus(UserStatus.ACTIVE, pageable);
         return userPage.map(userMapper::toResponse);
     }
 

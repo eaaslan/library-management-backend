@@ -10,8 +10,8 @@ public record UserResponse(
         String phoneNumber,
         String address,
         String role,
-        boolean active,
-        int borrowLimit,
+        String status,
+        int maxAllowedBorrows,
         LocalDateTime createdAt,
         String createdBy
 ) {

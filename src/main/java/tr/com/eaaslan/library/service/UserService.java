@@ -14,8 +14,6 @@ public interface UserService {
 
     UserResponse getUserById(Long id);
 
-    UserResponse getUserByUsername(String username);
-
     Page<UserResponse> getAllUsers(int page, int size, String sortBy);
 
     UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
@@ -27,6 +25,5 @@ public interface UserService {
     Page<UserResponse> getUsersByRole(String role, int page, int size);
 
     Page<UserResponse> getActiveUsers(int page, int size);
-
- 
+    
 }

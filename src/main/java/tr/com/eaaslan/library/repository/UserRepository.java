@@ -5,16 +5,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import tr.com.eaaslan.library.model.User;
 import tr.com.eaaslan.library.model.UserRole;
+import tr.com.eaaslan.library.model.UserStatus;
 
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);
 
-    boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
@@ -23,5 +22,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
             String firstName, String lastName, Pageable pageable);
 
-    Page<User> findAllByActive(boolean active, Pageable pageable);
+    Page<User> findAllByStatus(UserStatus status, Pageable pageable);
 }
