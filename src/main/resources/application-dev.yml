@@ -1,4 +1,7 @@
 spring:
+  jwt:
+    secret: 4261656C64756E6732303235536563726574546F6B656E4B6579466F724C6962726172794170706C69636174696F6E
+    expiration-ms: 86400000  # 24 hours
   datasource:
     url: jdbc:postgresql://localhost:5432/library_db
     username: postgres

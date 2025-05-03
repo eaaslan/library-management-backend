@@ -22,14 +22,14 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${app.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")
+    @Value("${spring.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")
     private String secretKey;
 
-    @Value("${app.jwt.expiration-ms:86400000}") // 24 hours by default
+    @Value("${spring.jwt.expiration-ms:86400000}") // 24 hours by default
     private long jwtExpirationMs;
 
     private Key key;
-    
+
 
     @PostConstruct
     public void init() {
