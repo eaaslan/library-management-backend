@@ -1,7 +1,7 @@
-package tr.com.eaaslan.library.model.dto;
+package tr.com.eaaslan.library.model.dto.Book;
 
 public record BookUpdateRequest(
-        
+
         String isbn,
         String title,
         String author,

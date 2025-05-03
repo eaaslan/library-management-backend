@@ -6,10 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tr.com.eaaslan.library.model.Genre;
-import tr.com.eaaslan.library.model.dto.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.BookResponse;
-import tr.com.eaaslan.library.model.dto.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookResponse;
+import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 import tr.com.eaaslan.library.service.BookService;
 
 import java.util.List;

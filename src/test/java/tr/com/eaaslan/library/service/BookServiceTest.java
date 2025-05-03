@@ -1,6 +1,5 @@
 package tr.com.eaaslan.library.service;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,12 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
-import tr.com.eaaslan.library.model.dto.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.BookResponse;
-import tr.com.eaaslan.library.model.dto.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookResponse;
+import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 import tr.com.eaaslan.library.model.mapper.BookMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
-import tr.com.eaaslan.library.util.BookTestData;
 
 import java.time.Year;
 import java.util.List;

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
-import tr.com.eaaslan.library.model.dto.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.BookResponse;
-import tr.com.eaaslan.library.model.dto.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookResponse;
+import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 import tr.com.eaaslan.library.model.mapper.BookMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
 

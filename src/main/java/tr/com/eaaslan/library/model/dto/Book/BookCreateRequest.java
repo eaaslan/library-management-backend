@@ -1,4 +1,4 @@
-package tr.com.eaaslan.library.model.dto;
+package tr.com.eaaslan.library.model.dto.Book;
 
 public record BookCreateRequest(
         String isbn,

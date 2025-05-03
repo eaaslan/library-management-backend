@@ -3,6 +3,7 @@ package tr.com.eaaslan.library.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -38,6 +39,11 @@ public class User extends BaseEntity {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
+    @Column(nullable = false, name = "phone")
+    @NotBlank(message = "Phone is required")
+    @Pattern(regexp = "^(0|\\+90)?5[0-9]{9}$", message = "Please enter a valid Turkish mobile phone number")
+    private String phone;
+
     @Column(nullable = false, name = "role")
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -48,7 +54,6 @@ public class User extends BaseEntity {
     @Builder.Default
     private UserStatus status = UserStatus.PENDING;
 
-    // Soft delete fields (separate concept from status)
     @Column(name = "deleted")
     @Builder.Default
     private boolean deleted = false;

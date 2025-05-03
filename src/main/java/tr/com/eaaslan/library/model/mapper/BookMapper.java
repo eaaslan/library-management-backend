@@ -3,11 +3,9 @@ package tr.com.eaaslan.library.model.mapper;
 import org.mapstruct.*;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
-import tr.com.eaaslan.library.model.dto.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.BookResponse;
-import tr.com.eaaslan.library.model.dto.BookUpdateRequest;
-
-import java.time.Year;
+import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.Book.BookResponse;
+import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BookMapper {
