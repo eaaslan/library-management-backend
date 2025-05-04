@@ -8,7 +8,8 @@ import tr.com.eaaslan.library.model.Borrowing;
 import tr.com.eaaslan.library.model.BorrowingStatus;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BorrowingMapper {
@@ -29,9 +30,9 @@ public interface BorrowingMapper {
     }
 
     @Named("isOverdue")
-    default boolean isOverdue(LocalDateTime dueDate, BorrowingStatus status) {
+    default boolean isOverdue(LocalDate dueDate, BorrowingStatus status) {
         return status == BorrowingStatus.ACTIVE &&
                 dueDate != null &&
-                dueDate.isBefore(LocalDateTime.now());
+                dueDate.isBefore(LocalDate.now());
     }
 }

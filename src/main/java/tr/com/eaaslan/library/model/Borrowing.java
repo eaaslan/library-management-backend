@@ -17,8 +17,8 @@ import java.time.LocalDate;
 public class Borrowing extends BaseEntity {
 
 
-    @Column(name = "borrowing_date", nullable = false)
-    private LocalDate borrowingDate;
+    @Column(name = "borrow_date", nullable = false)
+    private LocalDate borrowDate;
 
     @Column(name = "return_date")
     @Future(message = "Return date must be in the future")
@@ -42,13 +42,13 @@ public class Borrowing extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Borrowing borrowing)) return false;
-        return user != null && book != null && borrowingDate != null &&
-                user.equals(borrowing.user) && book.equals(borrowing.book) && borrowingDate.equals(borrowing.borrowingDate);
+        return user != null && book != null && borrowDate != null &&
+                user.equals(borrowing.user) && book.equals(borrowing.book) && borrowDate.equals(borrowing.borrowDate);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode() + (user != null ? user.hashCode() : 0) + (book != null ? book.hashCode() : 0) + (borrowingDate != null ? borrowingDate.hashCode() : 0);
+        return getClass().hashCode() + (user != null ? user.hashCode() : 0) + (book != null ? book.hashCode() : 0) + (borrowDate != null ? borrowDate.hashCode() : 0);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class Borrowing extends BaseEntity {
         return "Borrowing{" +
                 "user=" + (user != null ? user.getEmail() : "null") +
                 ", book=" + (book != null ? book.getTitle() : "null") +
-                ", borrowingDate=" + borrowingDate +
+                ", borrowingDate=" + borrowDate +
                 ", dueDate=" + dueDate +
                 ", returnDate=" + returnDate +
                 ", status=" + status +

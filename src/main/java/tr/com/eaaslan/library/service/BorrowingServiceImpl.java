@@ -44,6 +44,8 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     private static final int DEFAULT_BORROW_DAYS = 14; // Two weeks
 
+    //todo create exception for trying to borrow same book and exceed borrow limit
+    //todo check whether use localdatetime or localdate and on response dates does not set
     @Override
     @Transactional
     public BorrowingResponse borrowBook(BorrowingCreateRequest request, String currentUserEmail) {
@@ -53,11 +55,11 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         // Get the user who will borrow the book (could be the current user or another user if librarian/admin)
         User borrowingUser;
-        if (request.userId().equals(currentUser.getId()) ||
+        if (
                 currentUser.getRole() == UserRole.LIBRARIAN ||
-                currentUser.getRole() == UserRole.ADMIN) {
+                        currentUser.getRole() == UserRole.ADMIN) {
 
-            borrowingUser = userRepository.findById(request.userId())
+            borrowingUser = userRepository.findById(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
         } else {
             throw new AccessDeniedException("You can only borrow books for yourself");
@@ -95,7 +97,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         Borrowing borrowing = Borrowing.builder()
                 .user(borrowingUser)
                 .book(book)
-                .borrowingDate(borrowDate)
+                .borrowDate(borrowDate)
                 .dueDate(dueDate)
                 .status(BorrowingStatus.ACTIVE)
                 .build();
