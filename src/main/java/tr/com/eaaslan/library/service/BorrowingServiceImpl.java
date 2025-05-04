@@ -19,11 +19,14 @@ import tr.com.eaaslan.library.model.UserRole;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingReturnRequest;
+import tr.com.eaaslan.library.model.mapper.BorrowingMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
 import tr.com.eaaslan.library.repository.BorrowingRepository;
 import tr.com.eaaslan.library.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -84,15 +87,15 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         // Create the borrowing entity
-        LocalDateTime borrowDate = LocalDateTime.now();
-        LocalDateTime dueDate = request.dueDate() != null ?
+        LocalDate borrowDate = LocalDate.now();
+        LocalDate dueDate = request.dueDate() != null ?
                 request.dueDate() :
-                borrowDate.plus(DEFAULT_BORROW_DAYS, ChronoUnit.DAYS);
+                borrowDate.plusDays(DEFAULT_BORROW_DAYS);
 
         Borrowing borrowing = Borrowing.builder()
                 .user(borrowingUser)
                 .book(book)
-                .borrowDate(borrowDate)
+                .borrowingDate(borrowDate)
                 .dueDate(dueDate)
                 .status(BorrowingStatus.ACTIVE)
                 .build();
@@ -135,8 +138,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         // Update borrowing status
-        LocalDateTime returnDate = request.returnDate() != null ?
-                request.returnDate() : LocalDateTime.now();
+        LocalDate returnDate = request.returnDate() != null ?
+                request.returnDate() : LocalDate.now();
 
         borrowing.setReturnDate(returnDate);
         borrowing.setStatus(BorrowingStatus.RETURNED);
@@ -211,7 +214,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         return borrowingMapper.toResponse(borrowing);
     }
-    
+
     @Transactional
     public void updateOverdueStatus() {
         // Update overdue status for active borrowings
@@ -221,7 +224,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                 PageRequest.of(0, Integer.MAX_VALUE));
 
         List<Borrowing> overdueBorrowings = activeBorrowings.getContent().stream()
-                .filter(b -> b.getDueDate().isBefore(now))
+                .filter(b -> b.getDueDate().isBefore(ChronoLocalDate.from(now)))
                 .peek(b -> b.setStatus(BorrowingStatus.OVERDUE))
                 .toList();
 

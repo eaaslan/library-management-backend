@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingReturnRequest;
+import tr.com.eaaslan.library.service.BorrowingService;
 
 import java.security.Principal;
 
