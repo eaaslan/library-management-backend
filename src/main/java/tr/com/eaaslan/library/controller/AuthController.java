@@ -1,5 +1,7 @@
 package tr.com.eaaslan.library.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tr.com.eaaslan.library.config.ApiResponseAnnotations.LoginResponses;
+import tr.com.eaaslan.library.config.ApiResponseAnnotations.RegistrationResponses;
 import tr.com.eaaslan.library.model.dto.auth.JwtAuthResponse;
 import tr.com.eaaslan.library.model.dto.auth.LoginRequest;
 import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
@@ -32,12 +36,20 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @Operation(
+            summary = "User login",
+            description = "Authenticate user with email and password and return JWT token"
+    )
+//    @LoginResponses
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtAuthResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtil.generateToken(authentication);
         LibraryUserDetails userDetails = (LibraryUserDetails) authentication.getPrincipal();
+
+
         JwtAuthResponse response = new JwtAuthResponse(
                 jwt,
                 "Bearer",
@@ -48,6 +60,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "User register",
+            description = "Authenticate user with email and password and return JWT token"
+    )
+    @RegistrationResponses
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody UserCreateRequest registerRequest) {
         return ResponseEntity.ok(userService.createUser(registerRequest));
