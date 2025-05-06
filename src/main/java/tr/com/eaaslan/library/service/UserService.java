@@ -22,8 +22,10 @@ public interface UserService {
 
     Page<UserResponse> searchUsersByName(String firstName, String lastName, int page, int size);
 
+    Page<UserResponse> searchByName(String searchTerm, int page, int size);
+
     Page<UserResponse> getUsersByRole(String role, int page, int size);
 
     Page<UserResponse> getActiveUsers(int page, int size);
-    
+
 }

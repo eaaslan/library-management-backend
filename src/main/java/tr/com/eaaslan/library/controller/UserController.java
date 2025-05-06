@@ -92,6 +92,14 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsersByName(firstName, lastName, page, size));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserResponse>> searchUsers(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.searchByName(name, page, size));
+    }
+
     @Operation(
             summary = "Get users by role",
             description = "Returns users with the provided role"

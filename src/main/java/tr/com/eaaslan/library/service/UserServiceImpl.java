@@ -84,6 +84,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserResponse> searchByName(String searchTerm, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.searchByName(searchTerm, pageable);
+        return userPage.map(userMapper::toResponse);
+    }
+
+    @Override
     public Page<UserResponse> getUsersByRole(String role, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findByRole(UserRole.valueOf(role), pageable);
