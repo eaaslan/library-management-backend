@@ -28,12 +28,13 @@ public class BorrowingController {
             summary = "Borrow a book",
             description = "The patron can borrow a book"
     )
-    @PostMapping
+    @PostMapping("/{borrowingId}")
     public ResponseEntity<BorrowingResponse> borrowBook(
+            @PathVariable Long borrowingId,
             @Valid @RequestBody BorrowingCreateRequest borrowingCreateRequest,
             Principal principal) {
         // For patrons, they can only borrow books for themselves
-        BorrowingResponse response = borrowingService.borrowBook(borrowingCreateRequest, principal.getName());
+        BorrowingResponse response = borrowingService.borrowBook(borrowingId, borrowingCreateRequest, principal.getName());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

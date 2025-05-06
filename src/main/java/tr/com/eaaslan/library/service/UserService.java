@@ -19,8 +19,7 @@ public interface UserService {
     UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
 
     UserResponse deleteUser(Long id);
-
-    Page<UserResponse> searchUsersByName(String firstName, String lastName, int page, int size);
+    
 
     Page<UserResponse> searchByName(String searchTerm, int page, int size);
 

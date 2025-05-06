@@ -26,7 +26,7 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     Page<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status, Pageable pageable);
 
     // Find overdue borrowings
-    @Query("SELECT b FROM Borrowing b WHERE b.status = 'ACTIVE' AND b.dueDate < :currentDate")
+    @Query("SELECT b FROM Borrowing b WHERE b.status = 'OVERDUE'")
     Page<Borrowing> findOverdueBorrowings(LocalDateTime currentDate, Pageable pageable);
 
     // Check if a user has already borrowed a specific book

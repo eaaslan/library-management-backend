@@ -11,6 +11,8 @@ public record BorrowingCreateRequest(
         @Positive(message = "Book ID must be positive")
         Long bookId,
 
-        LocalDate dueDate
+        LocalDate dueDate,
+
+        LocalDate returnDate
 ) {
 }

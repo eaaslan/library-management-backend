@@ -9,6 +9,7 @@ import tr.com.eaaslan.library.model.UserStatus;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 
 @Getter
@@ -20,7 +21,7 @@ public class LibraryUserDetails implements UserDetails {
     private final String firstName;
     private final String lastName;
     private final Collection<? extends GrantedAuthority> authorities;
-    private final boolean isActive;
+    private final UserStatus status;
 
     public LibraryUserDetails(User user) {
         this.id = user.getId();
@@ -29,7 +30,7 @@ public class LibraryUserDetails implements UserDetails {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-        this.isActive = user.getStatus() == UserStatus.ACTIVE;
+        this.status = user.getStatus();
     }
 
     @Override
@@ -54,7 +55,7 @@ public class LibraryUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return isActive;
+        return status == UserStatus.ACTIVE || status == UserStatus.SUSPENDED;
     }
 
     @Override
@@ -64,6 +65,6 @@ public class LibraryUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        return status != UserStatus.DELETED;
     }
 }

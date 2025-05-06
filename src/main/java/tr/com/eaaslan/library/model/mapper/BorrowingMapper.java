@@ -20,8 +20,11 @@ public interface BorrowingMapper {
     @Mapping(target = "bookId", source = "book.id")
     @Mapping(target = "bookTitle", source = "book.title")
     @Mapping(target = "bookIsbn", source = "book.isbn")
+    @Mapping(target = "dueDate", source = "dueDate")
+    @Mapping(target = "returnDate", source = "returnDate")
+    @Mapping(target = "borrowDate", source = "borrowDate")
     @Mapping(target = "status", source = "status", qualifiedByName = "statusToString")
-    @Mapping(target = "isOverdue", expression = "java(isOverdue(borrowing.getDueDate(), borrowing.getStatus()))")
+    @Mapping(target = "returnedLate", source = "returnedLate")
     BorrowingResponse toResponse(Borrowing borrowing);
 
     @Named("statusToString")
@@ -29,10 +32,10 @@ public interface BorrowingMapper {
         return status != null ? status.name() : null;
     }
 
-    @Named("isOverdue")
-    default boolean isOverdue(LocalDate dueDate, BorrowingStatus status) {
-        return status == BorrowingStatus.ACTIVE &&
-                dueDate != null &&
-                dueDate.isBefore(LocalDate.now());
-    }
+//    @Named("isCurrentlyOverdue")
+//    default boolean isCurrentlyOverdue(LocalDate dueDate, BorrowingStatus status) {
+//        return status == BorrowingStatus.ACTIVE &&
+//                dueDate != null &&
+//                dueDate.isBefore(LocalDate.now());
+//    }
 }

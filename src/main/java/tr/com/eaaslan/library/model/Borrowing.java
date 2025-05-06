@@ -21,7 +21,7 @@ public class Borrowing extends BaseEntity {
     private LocalDate borrowDate;
 
     @Column(name = "return_date")
-    @Future(message = "Return date must be in the future")
+    //@Future(message = "Return date must be in the future")
     private LocalDate returnDate;
 
     @Column(name = "due_date")
@@ -30,6 +30,17 @@ public class Borrowing extends BaseEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private BorrowingStatus status;
+
+    @Column(name = "returned_late")
+    @Builder.Default
+    private boolean returnedLate = false;
+
+    @Transient
+    public boolean isOverdue() {
+        return status == BorrowingStatus.ACTIVE &&
+                dueDate != null &&
+                dueDate.isBefore(LocalDate.now());
+    }
 
     @ManyToOne
     private Book book;
@@ -60,6 +71,7 @@ public class Borrowing extends BaseEntity {
                 ", dueDate=" + dueDate +
                 ", returnDate=" + returnDate +
                 ", status=" + status +
+                ", returnedLate=" + returnedLate +
                 '}';
     }
 

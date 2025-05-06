@@ -81,17 +81,11 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, userCreateRequest));
     }
 
+
     @Operation(
             summary = "Search users by name",
             description = "Returns users with the provided name"
     )
-    @GetMapping("/search/name/{firstName}/{lastName}")
-    public ResponseEntity<Page<UserResponse>> searchUsersByName(@PathVariable String firstName, @PathVariable String lastName,
-                                                                @RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(userService.searchUsersByName(firstName, lastName, page, size));
-    }
-
     @GetMapping("/search")
     public ResponseEntity<Page<UserResponse>> searchUsers(
             @RequestParam String name,

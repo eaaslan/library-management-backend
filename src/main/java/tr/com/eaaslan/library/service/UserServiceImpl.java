@@ -36,6 +36,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            throw new RuntimeException("Phone number already exists");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return userMapper.toResponse(user);
@@ -76,12 +80,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    @Override
-    public Page<UserResponse> searchUsersByName(String firstName, String lastName, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(firstName, lastName, pageable);
-        return userPage.map(userMapper::toResponse);
-    }
 
     @Override
     public Page<UserResponse> searchByName(String searchTerm, int page, int size) {

@@ -7,7 +7,7 @@ import tr.com.eaaslan.library.model.dto.borrowing.BorrowingReturnRequest;
 
 public interface BorrowingService {
 
-    BorrowingResponse borrowBook(BorrowingCreateRequest borrowingCreateRequest, String currentUserEmail);
+    BorrowingResponse borrowBook(Long id, BorrowingCreateRequest borrowingCreateRequest, String currentUserEmail);
 
     BorrowingResponse returnBook(Long id, BorrowingReturnRequest returnRequest, String currentUserEmail);
 
