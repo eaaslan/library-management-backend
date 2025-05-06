@@ -50,6 +50,10 @@ public class BorrowingServiceImpl implements BorrowingService {
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
 
         if (currentUser.getStatus() != UserStatus.ACTIVE) {
+            if (currentUser.getStatus() == UserStatus.SUSPENDED) {
+                throw new AccessDeniedException("Your account is suspended until " +
+                        currentUser.getSuspensionEndDate() + ". You cannot borrow books at this time.");
+            }
             throw new RuntimeException("User is not active");
         }
         // Get the borrowing record

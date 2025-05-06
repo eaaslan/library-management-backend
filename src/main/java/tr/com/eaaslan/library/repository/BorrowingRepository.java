@@ -1,6 +1,7 @@
 package tr.com.eaaslan.library.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import tr.com.eaaslan.library.model.Borrowing;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import tr.com.eaaslan.library.model.BorrowingStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +26,12 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     // Find by user ID and status
     Page<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status, Pageable pageable);
+
+    long countByUserIdAndReturnedLateAndReturnDateBetween(Long userId, boolean returnedLate,
+                                                          LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT MAX(b.borrowDate) FROM Borrowing b WHERE b.user.id = :userId")
+    LocalDate findLatestActivityDateByUserId(@Param("userId") Long userId);
 
     // Find overdue borrowings
     @Query("SELECT b FROM Borrowing b WHERE b.status = 'OVERDUE'")

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,6 +32,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, name = "first_name")
     @NotBlank(message = "First name is required")
     private String firstName;
+
+    @Column(name = "suspension_end_date")
+    private LocalDate suspensionEndDate;
 
     @Column(nullable = false, name = "last_name")
     @NotBlank(message = "Last name is required")

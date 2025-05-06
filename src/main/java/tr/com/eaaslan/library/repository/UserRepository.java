@@ -10,6 +10,8 @@ import tr.com.eaaslan.library.model.User;
 import tr.com.eaaslan.library.model.UserRole;
 import tr.com.eaaslan.library.model.UserStatus;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -24,6 +26,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByRole(UserRole role, Pageable pageable);
 
+    List<User> findAllByStatus(UserStatus status);
+
+    List<User> findByStatusAndSuspensionEndDateBefore(UserStatus status, LocalDate date);
 
     // Add this new method for improved name searching
     @Query("SELECT u FROM User u WHERE " +
