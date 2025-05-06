@@ -2,6 +2,7 @@ package tr.com.eaaslan.library.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +24,8 @@ import tr.com.eaaslan.library.security.LibraryUserDetails;
 import tr.com.eaaslan.library.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
+@Tag(name = "Authentication Management", description = "APIs for managing authentication in the library")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;

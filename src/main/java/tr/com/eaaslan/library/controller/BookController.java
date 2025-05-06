@@ -21,7 +21,7 @@ import tr.com.eaaslan.library.service.BookService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/books")
+@RequestMapping("/books")
 @RequiredArgsConstructor
 @Tag(name = "Book Management", description = "APIs for managing books in the library")
 public class BookController {
