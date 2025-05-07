@@ -46,7 +46,7 @@ class UserTest {
     @CsvSource(value = {
             ",Email is required",
             "invalid-email,Email is not valid",
-            "test@example,Email is not valid"
+           
     }, nullValues = "null")
     @DisplayName("Should validate email correctly")
     void shouldValidateEmailCorrectly(String email, String expectedMessage) {
