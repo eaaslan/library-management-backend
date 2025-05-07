@@ -105,5 +105,10 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsersByRole(role, page, size));
     }
 
+    @PutMapping("/{id}/status/{status}")
+    public ResponseEntity<UserResponse> updateUserStatus(@PathVariable Long id, @PathVariable String status) {
+        return ResponseEntity.ok(userService.updateUserStatus(id, status));
+    }
+
 
 }

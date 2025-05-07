@@ -44,7 +44,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     //todo check whether use localdatetime or localdate and on response dates does not set
     @Override
     @Transactional
-    public BorrowingResponse borrowBook(Long id, BorrowingCreateRequest request, String currentUserEmail) {
+    public BorrowingResponse borrowBook(BorrowingCreateRequest request, String currentUserEmail) {
         // Get the current user
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
@@ -56,48 +56,38 @@ public class BorrowingServiceImpl implements BorrowingService {
             }
             throw new RuntimeException("User is not active");
         }
-        // Get the borrowing record
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Borrowing record not found"));
-        // Get the user who will borrow the book (could be the current user or another user if librarian/admin)
-
-        if (!borrowing.getUser().getId().equals(currentUser.getId()) &&
-                currentUser.getRole() != UserRole.LIBRARIAN &&
-                currentUser.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("You can only return books borrowed by yourself");
+        if (borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE) >= 3) {
+            throw new RuntimeException("You cannot borrow more than 3 books at the same time.");
         }
 
-        // Check if the book is already returned
-        if (borrowing.getStatus() == BorrowingStatus.RETURNED) {
-            throw new RuntimeException("Book is already returned");
-        }
-        // Update borrowing status
-        LocalDate returnDate = request.returnDate() != null ?
-                request.returnDate() : LocalDate.now();
-
-        borrowing.setReturnDate(returnDate);
-        borrowing.setStatus(BorrowingStatus.RETURNED);
-
-        // Check if the book is returned late and set the flag
-        if (returnDate.isAfter(borrowing.getDueDate())) {
-            borrowing.setReturnedLate(true);
-            log.info("Book returned late: {} days overdue",
-                    returnDate.toEpochDay() - borrowing.getDueDate().toEpochDay());
+        Book book = bookRepository.findById(request.bookId())
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        // if user tried to book same book again it will throw first book is not avaliable but i want to borrow same book again exception
+        if (book.isAvailable() && book.getQuantity() <= 0) {
+            throw new RuntimeException("Book is not available");
         }
 
+        if (borrowingRepository.existsByUserIdAndBookIdAndStatus(currentUser.getId(), request.bookId(), BorrowingStatus.ACTIVE)) {
+            throw new RuntimeException("You have already borrowed this book");
+        }
 
-        // Update book availability
-        Book book = borrowing.getBook();
-        book.setQuantity(book.getQuantity() + 1);
-        book.setAvailable(true);
+        // Create a new borrowing record
+        Borrowing borrowing = Borrowing.builder()
+                .user(currentUser)
+                .book(book)
+                .borrowDate(LocalDate.now())
+                .returnDate(LocalDate.now().plusDays(DEFAULT_BORROW_DAYS))
+                .status(BorrowingStatus.ACTIVE)
+                .build();
+
+        // Save the borrowing record
+        borrowing = borrowingRepository.save(borrowing);
+
+        book.setQuantity(book.getQuantity() - 1);
         bookRepository.save(book);
+        return borrowingMapper.toResponse(borrowing);
 
-        // Save the updated borrowing record
-        Borrowing updatedBorrowing = borrowingRepository.save(borrowing);
-        log.info("Book returned: {}, by user: {}, returnedLate: {}",
-                book.getTitle(), borrowing.getUser().getEmail(), borrowing.isReturnedLate());
 
-        return borrowingMapper.toResponse(updatedBorrowing);
     }
 
     @Override

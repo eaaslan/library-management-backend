@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tr.com.eaaslan.library.config.ApiResponseAnnotations.LoginResponses;
 import tr.com.eaaslan.library.config.ApiResponseAnnotations.RegistrationResponses;
 import tr.com.eaaslan.library.model.dto.auth.JwtAuthResponse;
 import tr.com.eaaslan.library.model.dto.auth.LoginRequest;

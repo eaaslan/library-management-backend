@@ -55,7 +55,7 @@ public class LibraryUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return status == UserStatus.ACTIVE || status == UserStatus.SUSPENDED;
+        return status != UserStatus.DELETED;
     }
 
     @Override

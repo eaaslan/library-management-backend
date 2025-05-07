@@ -80,6 +80,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
+    //todo implement auth
+    @Override
+    public UserResponse updateUserStatus(Long id, String status) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(UserStatus.valueOf(status));
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
 
     @Override
     public Page<UserResponse> searchByName(String searchTerm, int page, int size) {

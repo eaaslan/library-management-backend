@@ -8,7 +8,6 @@ public record UserResponse(
         String firstName,
         String lastName,
         String phoneNumber,
-        String address,
         String role,
         String status,
         int maxAllowedBorrows,

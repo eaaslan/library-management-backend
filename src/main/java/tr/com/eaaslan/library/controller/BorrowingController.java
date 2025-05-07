@@ -24,17 +24,18 @@ public class BorrowingController {
 
     private final BorrowingService borrowingService;
 
+    // endpoint responselari ozellestir ayni kulalnici aynici booku kiralamak isterse
     @Operation(
             summary = "Borrow a book",
             description = "The patron can borrow a book"
     )
-    @PostMapping("/{borrowingId}")
+    @PostMapping()
     public ResponseEntity<BorrowingResponse> borrowBook(
-            @PathVariable Long borrowingId,
+
             @Valid @RequestBody BorrowingCreateRequest borrowingCreateRequest,
             Principal principal) {
         // For patrons, they can only borrow books for themselves
-        BorrowingResponse response = borrowingService.borrowBook(borrowingId, borrowingCreateRequest, principal.getName());
+        BorrowingResponse response = borrowingService.borrowBook(borrowingCreateRequest, principal.getName());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
