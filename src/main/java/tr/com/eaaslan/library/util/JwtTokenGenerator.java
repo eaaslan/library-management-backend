@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Profile("dev")
+@Profile("dev-token-gen")
 public class JwtTokenGenerator {
 
     @Value("${spring.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")

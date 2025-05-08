@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tr.com.eaaslan.library.exception.*;
 import tr.com.eaaslan.library.model.*;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
@@ -40,38 +41,34 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     private static final int DEFAULT_BORROW_DAYS = 14; // Two weeks
 
-    //todo create exception for trying to borrow same book and exceed borrow limit
-    //todo check whether use localdatetime or localdate and on response dates does not set
     @Override
     @Transactional
     public BorrowingResponse borrowBook(BorrowingCreateRequest request, String currentUserEmail) {
         // Get the current user
         User currentUser = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", currentUserEmail));
 
         if (currentUser.getStatus() != UserStatus.ACTIVE) {
             if (currentUser.getStatus() == UserStatus.SUSPENDED) {
-                throw new AccessDeniedException("Your account is suspended until " +
-                        currentUser.getSuspensionEndDate() + ". You cannot borrow books at this time.");
+                throw new UserSuspendedException(currentUserEmail, currentUser.getSuspensionEndDate());
             }
-            throw new RuntimeException("User is not active");
+            throw new InvalidUserStatusException(currentUserEmail, currentUser.getStatus().toString());
         }
         if (borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE) >= 3) {
-            throw new RuntimeException("You cannot borrow more than 3 books at the same time.");
+            throw new BorrowingLimitExceededException(currentUser.getMaxAllowedBorrows());
         }
 
         Book book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new RuntimeException("Book not found"));
         // if user tried to book same book again it will throw first book is not avaliable but i want to borrow same book again exception
         if (book.isAvailable() && book.getQuantity() <= 0) {
-            throw new RuntimeException("Book is not available");
+            throw new BookNotAvailableException(book.getId());
         }
 
         if (borrowingRepository.existsByUserIdAndBookIdAndStatus(currentUser.getId(), request.bookId(), BorrowingStatus.ACTIVE)) {
-            throw new RuntimeException("You have already borrowed this book");
+            throw new AlreadyBorrowedException(request.bookId(), currentUserEmail);
         }
 
-        // Create a new borrowing record
         Borrowing borrowing = Borrowing.builder()
                 .user(currentUser)
                 .book(book)
@@ -95,11 +92,11 @@ public class BorrowingServiceImpl implements BorrowingService {
     public BorrowingResponse returnBook(Long id, BorrowingReturnRequest request, String currentUserEmail) {
         // Get the current user
         User currentUser = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", currentUserEmail));
 
         // Get the borrowing record
         Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Borrowing record not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Borrowing", "ID", id));
 
         // Check if the current user is authorized to return this book
         if (!borrowing.getUser().getId().equals(currentUser.getId()) &&
@@ -110,7 +107,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         // Check if the book is already returned
         if (borrowing.getStatus() == BorrowingStatus.RETURNED) {
-            throw new RuntimeException("Book is already returned");
+            throw new BookAlreadyReturnedException(id);
         }
 
         // Update borrowing status
@@ -153,7 +150,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     public Page<BorrowingResponse> getBorrowingsByUser(Long userId, int page, int size) {
         // Verify user exists
         userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
         return borrowingRepository.findByUserId(userId, pageable)
@@ -164,7 +161,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Transactional(readOnly = true)
     public Page<BorrowingResponse> getBorrowingsByCurrentUser(String userEmail, int page, int size) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
         return getBorrowingsByUser(user.getId(), page, size);
     }
@@ -174,7 +171,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     public Page<BorrowingResponse> getBorrowingsByBook(Long bookId, int page, int size) {
         // Verify book exists
         bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book", "ID", bookId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
         return borrowingRepository.findByBookId(bookId, pageable)
@@ -192,9 +189,10 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Override
     @Transactional(readOnly = true)
     public BorrowingResponse getBorrowingById(Long id) {
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Borrowing record not found"));
 
+        Borrowing borrowing = borrowingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Borrowing record", "ID", id));
+        log.info("Fetching borrowing with ID: {}", id);
         return borrowingMapper.toResponse(borrowing);
     }
 

@@ -1,15 +1,11 @@
-
 package tr.com.eaaslan.library.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import tr.com.eaaslan.library.util.ExampleProviders;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
-/**
- * Standardized error response for API errors.
- * Used to provide consistent error information across the API.
- */
 @Schema(description = "Standard error response",
         example = ExampleProviders.AUTH_FAILURE_EXAMPLE)
 public record ErrorResponse(
@@ -23,12 +19,16 @@ public record ErrorResponse(
         LocalDateTime timestamp,
 
         @Schema(description = "Request path that caused the error", example = "/api/v1/auth/login")
-        String path
+        String path,
+
+        @Schema(description = "Validation errors", example = "{\"email\":\"must be a valid email\"}")
+        Map<String, String> errors
 ) {
-    /**
-     * Convenience constructor that automatically sets the current timestamp
-     */
+    public ErrorResponse(int status, String message, LocalDateTime timestamp, String path) {
+        this(status, message, timestamp, path, null);
+    }
+
     public ErrorResponse(int status, String message, String path) {
-        this(status, message, LocalDateTime.now(), path);
+        this(status, message, LocalDateTime.now(), path, null);
     }
 }

@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tr.com.eaaslan.library.exception.ResourceAlreadyExistException;
+import tr.com.eaaslan.library.exception.ResourceNotFoundException;
 import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Genre;
 import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
@@ -19,7 +21,6 @@ import tr.com.eaaslan.library.repository.BookRepository;
 import java.util.List;
 
 @Service
-
 public class BookServiceImpl implements BookService {
 
     private static final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
@@ -36,7 +37,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookResponse createBook(BookCreateRequest bookCreateRequest) {
         bookRepository.findByIsbn(bookCreateRequest.isbn()).ifPresent(book -> {
-            throw new RuntimeException("Book already exists");
+            throw new ResourceAlreadyExistException("Book", "ISBN", bookCreateRequest.isbn());
         });
         Book book = bookMapper.toEntity(bookCreateRequest);
         log.info("Book created: {}", book);
@@ -47,7 +48,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public BookResponse getBookById(Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+        Book book = bookRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
         log.info("Fetching book with ID: {}", id);
         return bookMapper.toResponse(book);
     }
@@ -56,7 +57,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public BookResponse getBookByIsbn(String isbn) {
-        Book book = bookRepository.findByIsbn(isbn).orElseThrow(() -> new RuntimeException("Book not found"));
+        Book book = bookRepository.findByIsbn(isbn).orElseThrow(() -> new ResourceNotFoundException("Book", "ISBN", isbn));
         log.info("Fetching book with ISBN: {}", isbn);
         return bookMapper.toResponse(book);
     }
@@ -70,12 +71,11 @@ public class BookServiceImpl implements BookService {
         return bookPage.getContent().stream().map(bookMapper::toResponse).toList();
     }
 
-    //todo create specific exception
     @Override
     @Transactional
     public BookResponse updateBook(Long id, BookUpdateRequest bookUpdateRequest) {
         log.info("Updating book with ID: {}", id);
-        Book book = bookRepository.getBooksById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+        Book book = bookRepository.getBooksById(id).orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
         bookMapper.updateEntity(bookUpdateRequest, book);
         bookRepository.save(book);
         return bookMapper.toResponse(book);
@@ -84,7 +84,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public BookResponse deleteBook(Long id) {
-        Book book = bookRepository.getBooksById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+        Book book = bookRepository.getBooksById(id).orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
         log.info("Deleting book with ID: {}", id);
         bookRepository.delete(book);
         return bookMapper.toResponse(book);
