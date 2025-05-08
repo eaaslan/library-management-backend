@@ -1,7 +1,7 @@
 package tr.com.eaaslan.library.exception;
 
-public class InvalidDueDateException extends RuntimeException {
-  public InvalidDueDateException(String message) {
-    super(message);
-  }
+public class InvalidDueDateException extends BusinessRuleException {
+    public InvalidDueDateException(String message) {
+        super(String.format("Invalid due date: %s", message));
+    }
 }

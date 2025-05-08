@@ -29,7 +29,7 @@ public class Borrowing extends BaseEntity {
 
     @Column(name = "due_date")
     @NotNull(message = "Due date cannot be null")
-    @FutureOrPresent(message = "Due date must be today or in the future")
+    //@FutureOrPresent(message = "Due date must be today or in the future")
     private LocalDate dueDate;
 
     @Column(name = "status")

@@ -69,6 +69,10 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new AlreadyBorrowedException(request.bookId(), currentUserEmail);
         }
 
+        if (request.dueDate().isBefore(LocalDate.now())) {
+            throw new InvalidDueDateException(request.dueDate().toString());
+        }
+
         Borrowing borrowing = Borrowing.builder()
                 .user(currentUser)
                 .book(book)
