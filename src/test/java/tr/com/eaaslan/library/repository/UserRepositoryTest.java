@@ -110,16 +110,6 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should find users by status")
-    void shouldFindUsersByStatus() {
-        List<User> activeUsers = userRepository.findAllByStatus(UserStatus.ACTIVE);
-        List<User> suspendedUsers = userRepository.findAllByStatus(UserStatus.SUSPENDED);
-
-        assertEquals(3, activeUsers.size(), "Should find three active users");
-        assertEquals(1, suspendedUsers.size(), "Should find one suspended user");
-    }
-
-    @Test
     @DisplayName("Should check if email exists")
     void shouldCheckIfEmailExists() {
         assertTrue(userRepository.existsByEmail("admin@library.com"), "Email should exist");
@@ -146,7 +136,7 @@ class UserRepositoryTest {
                 UserStatus.SUSPENDED, LocalDate.now());
 
         assertEquals(1, usersToRestore.size(), "Should find one user with expired suspension");
-        assertEquals("past@library.com", usersToRestore.get(0).getEmail());
+        assertEquals("past@library.com", usersToRestore.getFirst().getEmail());
     }
 
     @Test
@@ -161,5 +151,17 @@ class UserRepositoryTest {
         assertEquals(1, adminSearch.getTotalElements(), "Should find one user with 'Admin' in name");
         assertEquals(1, suspendedSearch.getTotalElements(), "Should find one user with 'Suspended' in name");
         assertEquals(4, userSearch.getTotalElements(), "Should find all users with 'User' in lastname");
+    }
+
+    @Test
+    @DisplayName("Should search users by status")
+    void shouldSearchUsersByStatus() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<User> activeSearch = userRepository.findAllByStatus(UserStatus.ACTIVE, pageable);
+        Page<User> suspendedSearch = userRepository.findAllByStatus(UserStatus.SUSPENDED, pageable);
+
+        assertEquals(3, activeSearch.getTotalElements(), "Should find all active users");
+        assertEquals(1, suspendedSearch.getTotalElements(), "Should find one suspended user");
     }
 }

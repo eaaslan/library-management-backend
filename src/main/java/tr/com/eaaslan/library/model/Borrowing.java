@@ -2,7 +2,10 @@ package tr.com.eaaslan.library.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -18,13 +21,15 @@ public class Borrowing extends BaseEntity {
 
 
     @Column(name = "borrow_date", nullable = false)
+    @NotNull(message = "Borrow date is required")
     private LocalDate borrowDate;
 
     @Column(name = "return_date")
-    //@Future(message = "Return date must be in the future")
     private LocalDate returnDate;
 
     @Column(name = "due_date")
+    @NotNull(message = "Due date cannot be null")
+    @FutureOrPresent(message = "Due date must be today or in the future")
     private LocalDate dueDate;
 
     @Column(name = "status")
@@ -42,12 +47,28 @@ public class Borrowing extends BaseEntity {
                 dueDate.isBefore(LocalDate.now());
     }
 
+    //todo add more relations
     @ManyToOne
     private Book book;
 
     @ManyToOne
     private User user;
 
+    @AssertTrue(message = "Return date must be after borrow date")
+    private boolean isReturnDateValid() {
+        if (returnDate == null) {
+            return true;
+        }
+        return returnDate.isAfter(borrowDate) || returnDate.isEqual(borrowDate);
+    }
+
+    @AssertTrue(message = "Due date must be after borrow date")
+    private boolean isDueDateValid() {
+        if (dueDate == null || borrowDate == null) {
+            return true;
+        }
+        return dueDate.isAfter(borrowDate) || dueDate.isEqual(borrowDate);
+    }
 
     @Override
     public boolean equals(Object o) {
