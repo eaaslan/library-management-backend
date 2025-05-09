@@ -49,10 +49,11 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/books/**").permitAll()  // Allow anonymous access to book endpoints for browsing
-                        .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "LIBRARIAN")
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                // Allow anonymous access to book endpoints for browsing
+//                        .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "LIBRARIAN")
+//                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

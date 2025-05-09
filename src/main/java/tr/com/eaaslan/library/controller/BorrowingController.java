@@ -120,7 +120,7 @@ public class BorrowingController {
             description = "Returns borrowing with the provided borrowing id"
     )
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN') or @securityService.isCurrentUserBorrowing(#id)")
     public ResponseEntity<BorrowingResponse> getBorrowingById(@PathVariable Long id) {
         return ResponseEntity.ok(borrowingService.getBorrowingById(id));
     }

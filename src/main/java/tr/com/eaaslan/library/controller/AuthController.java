@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,6 +69,7 @@ public class AuthController {
     @RegistrationResponses
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody UserCreateRequest registerRequest) {
-        return ResponseEntity.ok(userService.createUser(registerRequest));
+        UserResponse createdUser = userService.createPatronUser(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 }

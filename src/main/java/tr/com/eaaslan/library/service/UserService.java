@@ -14,6 +14,8 @@ public interface UserService {
 
     UserResponse getUserById(Long id);
 
+    UserResponse createPatronUser(UserCreateRequest userCreateRequest);
+
     Page<UserResponse> getAllUsers(int page, int size, String sortBy);
 
     UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);

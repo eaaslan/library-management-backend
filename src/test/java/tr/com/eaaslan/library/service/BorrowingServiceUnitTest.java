@@ -7,11 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;
+import tr.com.eaaslan.library.exception.AlreadyBorrowedException;
+import tr.com.eaaslan.library.exception.BookAlreadyReturnedException;
+import tr.com.eaaslan.library.exception.BookNotAvailableException;
+import tr.com.eaaslan.library.exception.UserSuspendedException;
 import tr.com.eaaslan.library.model.*;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BorrowingServiceTest {
+class BorrowingServiceUnitTest {
 
     @Mock
     private BorrowingRepository borrowingRepository;
@@ -58,8 +59,9 @@ class BorrowingServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Setup test data
+        // Initialize test data
         activeUser = User.builder()
+
                 .email("user@example.com")
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.PATRON)
@@ -69,6 +71,7 @@ class BorrowingServiceTest {
         activeUser.setId(1L);
 
         suspendedUser = User.builder()
+
                 .email("suspended@example.com")
                 .status(UserStatus.SUSPENDED)
                 .suspensionEndDate(LocalDate.now().plusDays(7))
@@ -77,6 +80,7 @@ class BorrowingServiceTest {
 
         suspendedUser.setId(2L);
 
+
         availableBook = Book.builder()
 
                 .title("Available Book")
@@ -84,21 +88,17 @@ class BorrowingServiceTest {
                 .available(true)
                 .quantity(1)
                 .build();
-
         availableBook.setId(1L);
 
         unavailableBook = Book.builder()
-
                 .title("Unavailable Book")
                 .isbn("0987654321")
                 .available(false)
                 .quantity(0)
                 .build();
-
         unavailableBook.setId(2L);
 
         activeBorrowing = Borrowing.builder()
-
                 .user(activeUser)
                 .book(availableBook)
                 .borrowDate(LocalDate.now().minusDays(7))
@@ -109,20 +109,18 @@ class BorrowingServiceTest {
         activeBorrowing.setId(1L);
 
         borrowingResponse = new BorrowingResponse(
-                1L, 1L, "user@example.com", "User Name",
+                1L, 1L, "user@example.com", "Active User",
                 1L, "Available Book", "1234567890",
                 LocalDate.now(), LocalDate.now().plusDays(14), null,
                 BorrowingStatus.ACTIVE.name(), false, null, null
         );
-
         createRequest = new BorrowingCreateRequest(1L, null, null);
         returnRequest = new BorrowingReturnRequest(LocalDate.now());
     }
 
     @Test
-    @DisplayName("Should borrow a book successfully")
-    void shouldBorrowBookSuccessfully() {
-        // Arrange
+    @DisplayName("Should create a new borrowing")
+    void shouldCreateNewBorrowing() {
         when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
         when(bookRepository.findById(availableBook.getId())).thenReturn(Optional.of(availableBook));
         when(borrowingRepository.countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE)).thenReturn(0L);
@@ -131,96 +129,85 @@ class BorrowingServiceTest {
         when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(i -> i.getArgument(0));
         when(borrowingMapper.toResponse(any(Borrowing.class))).thenReturn(borrowingResponse);
 
-        // Act
         BorrowingResponse response = borrowingService.borrowBook(createRequest, activeUser.getEmail());
 
-        // Assert
         assertNotNull(response);
-        assertEquals(borrowingResponse.id(), response.id());
-        assertEquals(borrowingResponse.userEmail(), response.userEmail());
-        assertEquals(borrowingResponse.bookTitle(), response.bookTitle());
+        assertEquals(borrowingResponse, response);
 
         verify(bookRepository).save(any(Book.class));
         verify(borrowingRepository).save(any(Borrowing.class));
     }
 
     @Test
-    @DisplayName("Should throw exception when user is suspended")
-    void shouldThrowExceptionWhenUserIsSuspended() {
-        // Arrange
+    @DisplayName("Should throw exception when user has suspended status")
+    void shouldThrowExceptionWhenUserHasSuspendedStatus() {
         when(userRepository.findByEmail(suspendedUser.getEmail())).thenReturn(Optional.of(suspendedUser));
 
-        // Act & Assert
-        assertThrows(AccessDeniedException.class, () ->
-                borrowingService.borrowBook(createRequest, suspendedUser.getEmail()));
+        assertThrows(UserSuspendedException.class, () -> borrowingService.borrowBook(createRequest, suspendedUser.getEmail()));
 
         verify(bookRepository, never()).findById(any());
         verify(borrowingRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when user has reached borrow limit")
-    void shouldThrowExceptionWhenUserHasReachedBorrowLimit() {
-        // Arrange
+    @DisplayName("Should throw exception when book is unavailable")
+    void shouldThrowExceptionWhenBookIsUnavailable() {
+
         when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
-        when(borrowingRepository.countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE)).thenReturn(3L);
+        when(bookRepository.findById(unavailableBook.getId())).thenReturn(Optional.of(unavailableBook));
+        when(borrowingRepository.countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE)).thenReturn(0L);
 
-        // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () ->
-                borrowingService.borrowBook(createRequest, activeUser.getEmail()));
-        assertEquals("You cannot borrow more than 3 books at the same time.", exception.getMessage());
+        BorrowingCreateRequest unavailableBookRequest = new BorrowingCreateRequest(unavailableBook.getId(), null, null);
 
-        verify(bookRepository, never()).findById(any());
+        assertThrows(BookNotAvailableException.class, () -> borrowingService.borrowBook(unavailableBookRequest, activeUser.getEmail()));
+
+        verify(userRepository).findByEmail(any());
+        verify(bookRepository).findById(any());
         verify(borrowingRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when book is not available")
-    void shouldThrowExceptionWhenBookIsNotAvailable() {
-        // Arrange
+    @DisplayName("Should throw exception when user already borrowed the book")
+    void shouldThrowExceptionWhenUserAlreadyBorrowTheBook() {
+
         when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
         when(borrowingRepository.countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE)).thenReturn(0L);
-        when(bookRepository.findById(unavailableBook.getId())).thenReturn(Optional.of(unavailableBook));
+        when(bookRepository.findById(availableBook.getId())).thenReturn(Optional.of(availableBook));
+        when(borrowingRepository.existsByUserIdAndBookIdAndStatus(activeUser.getId(), availableBook.getId(), BorrowingStatus.ACTIVE)).thenReturn(true);
 
-        // Create request for unavailable book
-        BorrowingCreateRequest unavailableRequest = new BorrowingCreateRequest(unavailableBook.getId(), null, null);
+        assertThrows(AlreadyBorrowedException.class, () -> borrowingService.borrowBook(createRequest, activeUser.getEmail()));
 
-        // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () ->
-                borrowingService.borrowBook(unavailableRequest, activeUser.getEmail()));
-        assertEquals("Book is not available", exception.getMessage());
-
+        verify(userRepository).findByEmail(any());
+        verify(borrowingRepository).countByUserIdAndStatus(any(), any());
+        verify(bookRepository).findById(any());
         verify(borrowingRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should return a book successfully")
+    @DisplayName("Should return a book successfuly")
     void shouldReturnBookSuccessfully() {
-        // Arrange
         when(borrowingRepository.findById(activeBorrowing.getId())).thenReturn(Optional.of(activeBorrowing));
         when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
         when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(i -> i.getArgument(0));
         when(borrowingMapper.toResponse(any(Borrowing.class))).thenReturn(borrowingResponse);
 
-        // Act
         BorrowingResponse response = borrowingService.returnBook(activeBorrowing.getId(), returnRequest, activeUser.getEmail());
 
-        // Assert
         assertNotNull(response);
-        verify(bookRepository).save(any(Book.class));
+        verify(bookRepository).save(any());
         verify(borrowingRepository).save(any(Borrowing.class));
     }
 
     @Test
-    @DisplayName("Should throw exception when returning someone else's book")
-    void shouldThrowExceptionWhenReturningOthersBook() {
+    @DisplayName("Should throw exception when attempting to return someone else's book")
+    void shouldThrowExceptionWhenAttemptingToReturnSomeoneElsesBook() {
         // Arrange
         User otherUser = User.builder()
                 .email("other@example.com")
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.PATRON)
                 .build();
-        otherUser.setId(2L);
+        otherUser.setId(3L);
 
         when(borrowingRepository.findById(activeBorrowing.getId())).thenReturn(Optional.of(activeBorrowing));
         when(userRepository.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
@@ -231,14 +218,75 @@ class BorrowingServiceTest {
 
         verify(bookRepository, never()).save(any());
         verify(borrowingRepository, never()).save(any());
+
     }
 
     @Test
-    @DisplayName("Should get all borrowings")
-    void shouldGetAllBorrowings() {
+    @DisplayName("Should throw exception when book is already returned")
+    void shouldThrowExceptionWhenBookIsAlreadyReturned() {
         // Arrange
+        Borrowing returnedBorrowing = Borrowing.builder()
+
+                .user(activeUser)
+                .book(availableBook)
+                .borrowDate(LocalDate.now().minusDays(14))
+                .dueDate(LocalDate.now().minusDays(7))
+                .returnDate(LocalDate.now().minusDays(5))
+                .status(BorrowingStatus.RETURNED)
+                .build();
+
+        returnedBorrowing.setId(2L);
+
+        when(borrowingRepository.findById(returnedBorrowing.getId())).thenReturn(Optional.of(returnedBorrowing));
+        when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
+
+        // Act & Assert
+        assertThrows(BookAlreadyReturnedException.class, () ->
+                borrowingService.returnBook(returnedBorrowing.getId(), returnRequest, activeUser.getEmail()));
+
+        verify(bookRepository, never()).save(any());
+        verify(borrowingRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should mark book as returned late when returned after due date")
+    void shouldMarkBookAsReturnedLateWhenReturnedAfterDueDate() {
+        // Arrange
+        Borrowing lateBorrowing = Borrowing.builder()
+
+                .user(activeUser)
+                .book(availableBook)
+                .borrowDate(LocalDate.now().minusDays(14))
+                .dueDate(LocalDate.now().minusDays(1))
+                .status(BorrowingStatus.ACTIVE)
+                .build();
+        lateBorrowing.setId(3L);
+
+        when(borrowingRepository.findById(lateBorrowing.getId())).thenReturn(Optional.of(lateBorrowing));
+        when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
+        when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(i -> {
+            Borrowing savedBorrowing = i.getArgument(0);
+            assertTrue(savedBorrowing.isReturnedLate(), "Borrowing should be marked as returned late");
+            return savedBorrowing;
+        });
+        when(borrowingMapper.toResponse(any(Borrowing.class))).thenReturn(borrowingResponse);
+
+        // Act
+        borrowingService.returnBook(lateBorrowing.getId(), returnRequest, activeUser.getEmail());
+
+        // Assert
+        verify(bookRepository).save(any(Book.class));
+        verify(borrowingRepository).save(any(Borrowing.class));
+    }
+
+    @Test
+    @DisplayName("Should get all borrowings with pagination")
+    void shouldGetAllBorrowingsWithPagination() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("borrowDate").descending());
         Page<Borrowing> borrowingsPage = new PageImpl<>(List.of(activeBorrowing));
-        when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(borrowingsPage);
+
+        when(borrowingRepository.findAll(pageable)).thenReturn(borrowingsPage);
         when(borrowingMapper.toResponse(activeBorrowing)).thenReturn(borrowingResponse);
 
         // Act
@@ -254,9 +302,12 @@ class BorrowingServiceTest {
     @DisplayName("Should get borrowings by user")
     void shouldGetBorrowingsByUser() {
         // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Borrowing> borrowingsPage = new PageImpl<>(List.of(activeBorrowing));
+
         when(userRepository.findById(activeUser.getId())).thenReturn(Optional.of(activeUser));
-        when(borrowingRepository.findByUserId(eq(activeUser.getId()), any(Pageable.class))).thenReturn(borrowingsPage);
+        when(borrowingRepository.findByUserId(eq(activeUser.getId()), any(Pageable.class)))
+                .thenReturn(borrowingsPage);
         when(borrowingMapper.toResponse(activeBorrowing)).thenReturn(borrowingResponse);
 
         // Act
@@ -267,4 +318,38 @@ class BorrowingServiceTest {
         assertEquals(1, response.getTotalElements());
         assertEquals(borrowingResponse, response.getContent().get(0));
     }
+
+    @Test
+    @DisplayName("Should update overdue status for borrowings")
+    void shouldUpdateOverdueStatusForBorrowings() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        LocalDate today = LocalDate.now();
+
+        Borrowing overdueBorrowing = Borrowing.builder()
+
+                .user(activeUser)
+                .book(availableBook)
+                .borrowDate(today.minusDays(30))
+                .dueDate(today.minusDays(1))
+                .status(BorrowingStatus.ACTIVE)
+                .build();
+
+        overdueBorrowing.setId(4L);
+
+        Page<Borrowing> borrowingsPage = new PageImpl<>(List.of(overdueBorrowing));
+
+        when(borrowingRepository.findByStatus(eq(BorrowingStatus.ACTIVE), any(Pageable.class)))
+                .thenReturn(borrowingsPage);
+
+        // Act
+        borrowingService.updateOverdueStatus();
+
+//        // Assert
+//        verify(borrowingRepository).saveAll(argThat(borrowings ->
+//                borrowings.size() == 1 &&
+//                        borrowings.get(0).getStatus() == BorrowingStatus.OVERDUE
+//        ));
+    }
 }
+

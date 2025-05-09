@@ -47,6 +47,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse createPatronUser(UserCreateRequest userCreateRequest) {
+        User user = userMapper.toEntity(userCreateRequest);
+
+        // Explicitly set role and status for public registrations
+        user.setRole(UserRole.PATRON);
+        user.setStatus(UserStatus.PENDING);
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new ResourceAlreadyExistException("User", "email", user.getEmail());
+        }
+
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            throw new ResourceAlreadyExistException("User", "phone number", user.getPhoneNumber());
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
         return userMapper.toResponse(user);

@@ -61,7 +61,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         Book book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new RuntimeException("Book not found"));
         // if user tried to book same book again it will throw first book is not avaliable but i want to borrow same book again exception
-        if (book.isAvailable() && book.getQuantity() <= 0) {
+        if (!book.isAvailable() && book.getQuantity() <= 0) {
             throw new BookNotAvailableException(book.getId());
         }
 
@@ -69,7 +69,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new AlreadyBorrowedException(request.bookId(), currentUserEmail);
         }
 
-        if (request.dueDate().isBefore(LocalDate.now())) {
+        if (request.dueDate() != null && request.dueDate().isBefore(LocalDate.now())) {
             throw new InvalidDueDateException(request.dueDate().toString());
         }
 

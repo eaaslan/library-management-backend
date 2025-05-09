@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
 import tr.com.eaaslan.library.model.dto.Book.BookResponse;
@@ -36,6 +37,7 @@ public class BookController {
             @ApiResponse(responseCode = "409", description = "Book already exists")
     })
     @PostMapping
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<BookResponse> createBook(
             @Valid @RequestBody
             @Parameter(description = "Book creation request", required = true)
@@ -90,6 +92,7 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "Book not found")
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<BookResponse> updateBook(
             @Parameter(description = "Book ID", required = true) @PathVariable Long id,
             @Valid @RequestBody

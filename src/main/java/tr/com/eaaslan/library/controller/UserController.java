@@ -6,10 +6,12 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
 import tr.com.eaaslan.library.model.dto.user.UserResponse;
 import tr.com.eaaslan.library.model.dto.user.UserUpdateRequest;
+import tr.com.eaaslan.library.security.SecurityService;
 import tr.com.eaaslan.library.service.UserService;
 
 @RestController
@@ -18,9 +20,11 @@ import tr.com.eaaslan.library.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final SecurityService securityService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SecurityService securityService) {
         this.userService = userService;
+        this.securityService = securityService;
     }
 
     @Operation(
@@ -28,6 +32,7 @@ public class UserController {
             description = "Creates a new user with the provided information"
     )
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
         UserResponse createdUser = userService.createUser(userCreateRequest);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -38,6 +43,7 @@ public class UserController {
             description = "Returns all users in the library"
     )
     @GetMapping
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllUsers(@RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size,
                                                           @RequestParam(defaultValue = "id") String sortBy) {
@@ -49,6 +55,7 @@ public class UserController {
             description = "Returns all active users in the library"
     )
     @GetMapping("/active")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getActiveUsers(@RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(userService.getActiveUsers(page, size));
@@ -59,6 +66,7 @@ public class UserController {
             description = "Returns user with the provided id"
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN') or @securityService.isCurrentUser(#id)")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
@@ -68,6 +76,7 @@ public class UserController {
             description = "Deletes user with the provided id"
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.deleteUser(id));
     }
@@ -77,6 +86,7 @@ public class UserController {
             description = "Updates user with the provided id"
     )
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id)")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest userCreateRequest) {
         return ResponseEntity.ok(userService.updateUser(id, userCreateRequest));
     }
@@ -87,6 +97,7 @@ public class UserController {
             description = "Returns users with the provided name"
     )
     @GetMapping("/search")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> searchUsers(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
@@ -99,6 +110,7 @@ public class UserController {
             description = "Returns users with the provided role"
     )
     @GetMapping("/role/{role}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getUsersByRole(@PathVariable String role,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
@@ -106,6 +118,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/status/{status}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<UserResponse> updateUserStatus(@PathVariable Long id, @PathVariable String status) {
         return ResponseEntity.ok(userService.updateUserStatus(id, status));
     }
