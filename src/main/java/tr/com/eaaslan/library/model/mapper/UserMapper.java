@@ -6,9 +6,7 @@ import tr.com.eaaslan.library.model.UserRole;
 
 
 import tr.com.eaaslan.library.model.UserStatus;
-import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
-import tr.com.eaaslan.library.model.dto.user.UserResponse;
-import tr.com.eaaslan.library.model.dto.user.UserUpdateRequest;
+import tr.com.eaaslan.library.model.dto.user.*;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
@@ -19,6 +17,12 @@ public interface UserMapper {
     @Mapping(target = "role", source = "role", qualifiedByName = "userRoleToString")
     @Mapping(target = "status", source = "status", qualifiedByName = "userStatusToString")
     UserResponse toResponse(User user);
+
+    @Mapping(target = "role", source = "role", qualifiedByName = "userRoleToString")
+    LibrarianCreateResponse toLibrarianResponse(User user);
+
+    @Mapping(target = "role", source = "role", qualifiedByName = "userRoleToString")
+    UserUpdateResponse toUpdateResponse(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "email", ignore = true)

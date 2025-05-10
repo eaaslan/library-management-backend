@@ -15,7 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    
+
+    Page<User> findByDeletedFalse(Pageable pageable);
+
+    Page<User> findByDeletedTrue(Pageable pageable);
+
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
@@ -23,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
 
     Page<User> findByRole(UserRole role, Pageable pageable);
+
+    Page<User> findByRoleAndStatus(UserRole role, UserStatus status, Pageable pageable);
 
     List<User> findAllByStatus(UserStatus status);
 

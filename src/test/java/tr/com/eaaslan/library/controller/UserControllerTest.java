@@ -104,7 +104,7 @@ class UserControllerTest {
                 "PATRON", "ACTIVE", 3, LocalDateTime.now(), "system");
 
         // Mock davranışı
-        when(userService.createUser(any(UserCreateRequest.class))).thenReturn(userResponse);
+        when(userService.createPatronUser(any(UserCreateRequest.class))).thenReturn(userResponse);
 
         // API isteği ve doğrulama
         mockMvc.perform(post("/users")
@@ -117,7 +117,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email", is("test@example.com")))
                 .andExpect(jsonPath("$.firstName", is("Test")));
         // Servis çağrısını doğrula
-        verify(userService).createUser(any(UserCreateRequest.class));
+        verify(userService).createPatronUser(any(UserCreateRequest.class));
     }
 
 //    @Test

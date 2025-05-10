@@ -2,7 +2,7 @@ package tr.com.eaaslan.library.model.dto.user;
 
 import java.time.LocalDateTime;
 
-public record UserResponse(
+public record UserUpdateResponse(
         Long id,
         String email,
         String firstName,
@@ -13,6 +13,8 @@ public record UserResponse(
         int maxAllowedBorrows,
         LocalDateTime createdAt,
         String createdBy,
-        boolean deleted
+        boolean deleted,
+        LocalDateTime updatedAt,
+        String updatedBy
 ) {
 }

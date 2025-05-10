@@ -20,9 +20,7 @@ import tr.com.eaaslan.library.exception.ResourceNotFoundException;
 import tr.com.eaaslan.library.model.User;
 import tr.com.eaaslan.library.model.UserRole;
 import tr.com.eaaslan.library.model.UserStatus;
-import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
-import tr.com.eaaslan.library.model.dto.user.UserResponse;
-import tr.com.eaaslan.library.model.dto.user.UserUpdateRequest;
+import tr.com.eaaslan.library.model.dto.user.*;
 import tr.com.eaaslan.library.model.mapper.UserMapper;
 import tr.com.eaaslan.library.repository.UserRepository;
 
@@ -54,6 +52,7 @@ class UserServiceUnitTest {
     private UserResponse testUserResponse;
     private UserCreateRequest testUserCreateRequest;
     private UserUpdateRequest testUserUpdateRequest;
+    private UserUpdateResponse testUserUpdateResponse;
     private List<User> testUsers;
 
     @BeforeEach
@@ -82,7 +81,25 @@ class UserServiceUnitTest {
                 "ACTIVE",
                 3,
                 LocalDateTime.now(),
+                "system",
+                false
+        );
+
+        testUserUpdateResponse = new UserUpdateResponse(
+                1L,
+                "test@example.com",
+                "John",
+                "Doe",
+                "05501234567",
+                "PATRON",
+                "ACTIVE",
+                3,
+                LocalDateTime.now(),
+                "system",
+                false,
+                LocalDateTime.now(),
                 "system"
+
         );
 
         testUserCreateRequest = new UserCreateRequest(
@@ -115,7 +132,7 @@ class UserServiceUnitTest {
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
         // Act
-        UserResponse actual = userService.createUser(testUserCreateRequest);
+        LibrarianCreateResponse actual = userService.createLibrarianUser(testUserCreateRequest);
 
         // Assert
         assertNotNull(actual);
@@ -139,7 +156,7 @@ class UserServiceUnitTest {
         when(userMapper.toEntity(any(UserCreateRequest.class))).thenReturn(testUser);
 
         // Act & Assert
-        assertThrows(ResourceAlreadyExistException.class, () -> userService.createUser(testUserCreateRequest));
+        assertThrows(ResourceAlreadyExistException.class, () -> userService.createPatronUser(testUserCreateRequest));
 
         // Verify
         verify(userRepository).existsByEmail(testUserCreateRequest.email());
@@ -156,7 +173,7 @@ class UserServiceUnitTest {
         when(userMapper.toEntity(any(UserCreateRequest.class))).thenReturn(testUser);
 
         // Act & Assert
-        assertThrows(ResourceAlreadyExistException.class, () -> userService.createUser(testUserCreateRequest));
+        assertThrows(ResourceAlreadyExistException.class, () -> userService.createPatronUser(testUserCreateRequest));
 
         // Verify
         verify(userRepository).existsByEmail(testUserCreateRequest.email());
@@ -230,7 +247,7 @@ class UserServiceUnitTest {
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
         // Act
-        UserResponse actual = userService.updateUser(1L, testUserUpdateRequest);
+        UserUpdateResponse actual = userService.updateUser(1L, testUserUpdateRequest);
 
         // Assert
         assertNotNull(actual);
@@ -267,7 +284,7 @@ class UserServiceUnitTest {
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
         // Act
-        UserResponse actual = userService.deleteUser(1L);
+        UserResponse actual = userService.deleteUser(1L, "ADMIN");
 
         // Assert
         assertNotNull(actual);
@@ -284,7 +301,7 @@ class UserServiceUnitTest {
         User savedUser = userCaptor.getValue();
         assertTrue(savedUser.isDeleted());
         assertNotNull(savedUser.getDeletedAt());
-        assertEquals("SYSTEM", savedUser.getDeletedBy());
+        assertEquals("ADMIN", savedUser.getDeletedBy());
     }
 
     @Test
@@ -294,7 +311,7 @@ class UserServiceUnitTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(1L));
+        assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(1L, "ADMIN"));
 
         // Verify
         verify(userRepository).findById(1L);
@@ -310,7 +327,7 @@ class UserServiceUnitTest {
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
         // Act
-        UserResponse actual = userService.updateUserStatus(1L, "SUSPENDED");
+        UserUpdateResponse actual = userService.updateUserStatus(1L, "SUSPENDED");
 
         // Assert
         assertNotNull(actual);

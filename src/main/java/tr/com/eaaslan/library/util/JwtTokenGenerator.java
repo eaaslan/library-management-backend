@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Profile("dev-token-gen")
+@Profile("dev-token-generator")
 public class JwtTokenGenerator {
 
     @Value("${spring.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")
@@ -46,7 +46,13 @@ public class JwtTokenGenerator {
             // Generate patron token
             String patronToken = generatePermanentToken(key, "patron@library.com", "ROLE_PATRON");
             log.info("\nPERMANENT PATRON TOKEN FOR TESTING:");
-            log.info(librarianToken);
+            log.info(patronToken);
+            log.info("==================================================\n");
+
+            // Generate patron token
+            String pendingPatronToken = generatePermanentToken(key, "pendingPatron@library.com", "ROLE_PATRON");
+            log.info("\nPERMANENT PATRON TOKEN FOR TESTING:");
+            log.info(pendingPatronToken);
             log.info("==================================================\n");
         };
     }

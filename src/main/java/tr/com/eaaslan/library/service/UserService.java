@@ -1,32 +1,38 @@
 package tr.com.eaaslan.library.service;
 
 import org.springframework.data.domain.Page;
-import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
-import tr.com.eaaslan.library.model.dto.user.UserResponse;
-import tr.com.eaaslan.library.model.dto.user.UserUpdateRequest;
+import tr.com.eaaslan.library.model.dto.user.*;
 
 
 import java.util.List;
 
 public interface UserService {
 
-    UserResponse createUser(UserCreateRequest userCreateRequest);
+    LibrarianCreateResponse createLibrarianUser(UserCreateRequest userCreateRequest);
 
     UserResponse getUserById(Long id);
 
     UserResponse createPatronUser(UserCreateRequest userCreateRequest);
 
+    Page<UserResponse> getAllUsersIncludingDeleted(int page, int size, String sortBy);
+
+    Page<UserResponse> getAllActiveUsers(int page, int size, String sortBy);
+
     Page<UserResponse> getAllUsers(int page, int size, String sortBy);
 
-    UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
+    UserUpdateResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
 
-    UserResponse deleteUser(Long id);
+    UserResponse deleteUser(Long id, String userName);
 
-    UserResponse updateUserStatus(Long id, String status);
+    UserResponse hardDeleteUser(Long id, String userName);
+
+    UserUpdateResponse updateUserStatus(Long id, String status);
 
     Page<UserResponse> searchByName(String searchTerm, int page, int size);
 
     Page<UserResponse> getUsersByRole(String role, int page, int size);
+
+    Page<UserResponse> getActiveUsersByRole(String role, int page, int size);
 
     Page<UserResponse> getActiveUsers(int page, int size);
 

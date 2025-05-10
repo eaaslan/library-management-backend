@@ -136,7 +136,7 @@ class AuthControllerTest {
                 "system"
         );
 
-        when(userService.createUser(any(UserCreateRequest.class))).thenReturn(createdUser);
+        when(userService.createPatronUser(any(UserCreateRequest.class))).thenReturn(createdUser);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/auth/register")
@@ -164,7 +164,7 @@ class AuthControllerTest {
                 "123 Main St"
         );
 
-        when(userService.createUser(any(UserCreateRequest.class)))
+        when(userService.createPatronUser(any(UserCreateRequest.class)))
                 .thenThrow(new ResourceAlreadyExistException("User", "email", "existing@test.com"));
 
         // Act & Assert

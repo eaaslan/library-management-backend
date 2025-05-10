@@ -57,17 +57,32 @@ public class AdminUserInitializer implements CommandLineRunner {
 
         // Check if patron already exists
         if (!userRepository.existsByEmail("patron@library.com")) {
-            log.info("Librarian user not found. Creating patron user...");
+            log.info("Librarian user not found. Creating active patron user...");
             User librarianUser = User.builder()
                     .email("patron@library.com")
                     .password(passwordEncoder.encode("patron123"))
-                    .firstName("Librarian")
+                    .firstName("Patron")
                     .lastName("User")
                     .phoneNumber("05551234562")
-                    .role(UserRole.LIBRARIAN)
+                    .role(UserRole.PATRON)
                     .status(UserStatus.ACTIVE)
                     .build();
             userRepository.save(librarianUser);
+        }
+
+        // Check if patron already exists
+        if (!userRepository.existsByEmail("pendingPatron@library.com")) {
+            log.info("Librarian user not found. Creating active patron user...");
+            User librarianUser2 = User.builder()
+                    .email("pendingPatron@library.com")
+                    .password(passwordEncoder.encode("patron123"))
+                    .firstName("Pending Patron")
+                    .lastName("User")
+                    .phoneNumber("05251234962")
+                    .role(UserRole.PATRON)
+                    .status(UserStatus.PENDING)
+                    .build();
+            userRepository.save(librarianUser2);
         }
     }
 }

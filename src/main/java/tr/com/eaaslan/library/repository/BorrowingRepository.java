@@ -27,8 +27,12 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     // Find by user ID and status
     Page<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status, Pageable pageable);
 
+    List<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status);
+
     long countByUserIdAndReturnedLateAndReturnDateBetween(Long userId, boolean returnedLate,
                                                           LocalDate startDate, LocalDate endDate);
+
+    void deleteByUserId(Long userId);
 
     @Query("SELECT MAX(b.borrowDate) FROM Borrowing b WHERE b.user.id = :userId")
     LocalDate findLatestActivityDateByUserId(@Param("userId") Long userId);
