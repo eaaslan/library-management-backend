@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
@@ -35,6 +36,9 @@ public class BorrowingController {
             @Valid @RequestBody BorrowingCreateRequest borrowingCreateRequest,
             Principal principal) {
         // For patrons, they can only borrow books for themselves
+        if (principal == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required to return books");
+        }
         BorrowingResponse response = borrowingService.borrowBook(borrowingCreateRequest, principal.getName());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -48,6 +52,9 @@ public class BorrowingController {
             @PathVariable Long id,
             @Valid @RequestBody BorrowingReturnRequest returnRequest,
             Principal principal) {
+        if (principal == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required to return books");
+        }
         BorrowingResponse response = borrowingService.returnBook(id, returnRequest, principal.getName());
         return ResponseEntity.ok(response);
     }
@@ -74,6 +81,9 @@ public class BorrowingController {
             Principal principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        if (principal == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required to view your borrowings");
+        }
         return ResponseEntity.ok(borrowingService.getBorrowingsByCurrentUser(principal.getName(), page, size));
     }
 

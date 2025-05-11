@@ -54,41 +54,65 @@ public class BorrowingServiceImpl implements BorrowingService {
             }
             throw new InvalidUserStatusException(currentUserEmail, currentUser.getStatus().toString());
         }
-        if (borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE) >= 3) {
+
+        if (borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE) >=
+                currentUser.getMaxAllowedBorrows()) {
             throw new BorrowingLimitExceededException(currentUser.getMaxAllowedBorrows());
         }
 
         Book book = bookRepository.findById(request.bookId())
-                .orElseThrow(() -> new RuntimeException("Book not found"));
-        // if user tried to book same book again it will throw first book is not avaliable but i want to borrow same book again exception
-        if (!book.isAvailable() && book.getQuantity() <= 0) {
+                .orElseThrow(() -> new ResourceNotFoundException("Book", "ID", request.bookId()));
+
+        if (!book.isAvailable() || book.getQuantity() <= 0) {
             throw new BookNotAvailableException(book.getId());
         }
 
-        if (borrowingRepository.existsByUserIdAndBookIdAndStatus(currentUser.getId(), request.bookId(), BorrowingStatus.ACTIVE)) {
+        if (borrowingRepository.existsByUserIdAndBookIdAndStatus(
+                currentUser.getId(), request.bookId(), BorrowingStatus.ACTIVE)) {
             throw new AlreadyBorrowedException(request.bookId(), currentUserEmail);
         }
 
-        if (request.dueDate() != null && request.dueDate().isBefore(LocalDate.now())) {
-            throw new InvalidDueDateException(request.dueDate().toString());
+        // Handle due date with validation
+        LocalDate today = LocalDate.now();
+        LocalDate dueDate;
+
+        // If due date is provided, validate it
+        if (request.dueDate() != null) {
+            dueDate = request.dueDate();
+
+            // Check that due date is not in the past
+            if (dueDate.isBefore(today)) {
+                throw new InvalidDueDateException("Due date cannot be in the past");
+            }
+
+            // Check that due date is not too far in the future (max 30 days)
+            if (dueDate.isAfter(today.plusDays(30))) {
+                throw new InvalidDueDateException("Due date cannot be more than 30 days from today");
+            }
+        } else {
+            // Set default due date (14 days from today)
+            dueDate = today.plusDays(DEFAULT_BORROW_DAYS);
         }
 
         Borrowing borrowing = Borrowing.builder()
                 .user(currentUser)
                 .book(book)
-                .borrowDate(LocalDate.now())
-                .returnDate(LocalDate.now().plusDays(DEFAULT_BORROW_DAYS))
+                .borrowDate(today)
+                .dueDate(dueDate) // Using the validated due date
                 .status(BorrowingStatus.ACTIVE)
                 .build();
 
         // Save the borrowing record
         borrowing = borrowingRepository.save(borrowing);
 
+        // Update book availability
         book.setQuantity(book.getQuantity() - 1);
+        if (book.getQuantity() <= 0) {
+            book.setAvailable(false);
+        }
         bookRepository.save(book);
+
         return borrowingMapper.toResponse(borrowing);
-
-
     }
 
     @Override

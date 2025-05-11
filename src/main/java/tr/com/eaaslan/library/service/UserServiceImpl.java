@@ -64,19 +64,19 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse createPatronUser(UserCreateRequest userCreateRequest) {
+
+        if (userRepository.existsByEmail(userCreateRequest.email())) {
+            throw new ResourceAlreadyExistException("User", "email", userCreateRequest.email());
+        }
+
+        if (userRepository.existsByPhoneNumber(userCreateRequest.phoneNumber())) {
+            throw new ResourceAlreadyExistException("User", "phone number", userCreateRequest.phoneNumber());
+        }
         User user = userMapper.toEntity(userCreateRequest);
 
-        // Explicitly set role and status for public registrations
         user.setRole(UserRole.PATRON);
         user.setStatus(UserStatus.PENDING);
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ResourceAlreadyExistException("User", "email", user.getEmail());
-        }
-
-        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            throw new ResourceAlreadyExistException("User", "phone number", user.getPhoneNumber());
-        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -90,13 +90,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<UserResponse> getAllUsers(int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        Page<User> userPage = userRepository.findAll(pageable);
-        return userPage.map(userMapper::toResponse);
-    }
 
     public Page<UserResponse> getAllActiveUsers(int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
@@ -162,7 +155,7 @@ public class UserServiceImpl implements UserService {
         borrowingRepository.saveAll(activeBorrowings);
     }
 
-    //todo implement auth
+
     @Override
     @Transactional
     public UserUpdateResponse updateUserStatus(Long id, String status) {
@@ -210,6 +203,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> searchByName(String searchTerm, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.searchByName(searchTerm, pageable);
@@ -217,6 +211,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> getUsersByRole(String role, int page, int size) {
         UserRole userRole = UserRole.valueOf(role.toUpperCase());
         Pageable pageable = PageRequest.of(page, size);
@@ -225,6 +220,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> getActiveUsersByRole(String role, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findByRoleAndStatus(UserRole.valueOf(role.toUpperCase()), UserStatus.ACTIVE, pageable);
@@ -232,6 +228,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> getActiveUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAllByStatus(UserStatus.ACTIVE, pageable);

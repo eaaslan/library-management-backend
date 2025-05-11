@@ -18,36 +18,38 @@ import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 import tr.com.eaaslan.library.model.mapper.BookMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceUnitTest {
+
+    @Mock
+    private BookRepository bookRepository;
+
+    @Mock
+    private BookMapper bookMapper;
+
+    @InjectMocks
+    private BookServiceImpl bookService;
 
     private Book testBook;
     private BookResponse testBookResponse;
     private BookCreateRequest testBookCreateRequest;
     private BookUpdateRequest testBookUpdateRequest;
     private List<Book> testBooks;
-    private List<BookResponse> testBookResponses;
-
-    @Mock
-    private BookMapper bookMapper;
-
-    @Mock
-    private BookRepository bookRepository;
-
-    @InjectMocks
-    private BookServiceImpl bookServiceImpl;
+    private Page<Book> testBookPage;
 
     @BeforeEach
     void setUp() {
-        // Initialize test objects
+        // Initialize test book
         testBook = Book.builder()
                 .isbn("9780132350884")
                 .title("Clean Code")
@@ -61,20 +63,22 @@ class BookServiceUnitTest {
                 .quantity(1)
                 .build();
 
+        testBook.setId(1L);
+
         testBookResponse = new BookResponse(
-                testBook.getId(),
-                testBook.getIsbn(),
-                testBook.getTitle(),
-                testBook.getAuthor(),
-                testBook.getPublicationYear().getValue(),
-                testBook.getPublisher(),
-                testBook.getGenre().name(),
-                testBook.getImageUrl(),
-                testBook.getDescription(),
-                testBook.getQuantity(),
-                testBook.isAvailable(),
-                null, // createdAt
-                null  // createdBy
+                1L,
+                "9780132350884",
+                "Clean Code",
+                "Robert C. Martin",
+                2008,
+                "Prentice Hall",
+                "SCIENCE",
+                "http://example.com/image.jpg",
+                "A handbook of agile software craftsmanship",
+                1,
+                true,
+                LocalDateTime.now(),
+                "system"
         );
 
         testBookCreateRequest = new BookCreateRequest(
@@ -90,128 +94,164 @@ class BookServiceUnitTest {
         );
 
         testBookUpdateRequest = new BookUpdateRequest(
-                "9780132350884",
+                null, // ISBN should not be updated
                 "Clean Code: Updated Title",
-                "Robert C. Martin",
-                2008,
-                "Prentice Hall",
-                "SCIENCE",
-                "http://example.com/image.jpg",
+                null,
+                null,
+                null,
+                null,
+                null,
                 "Updated description",
                 2,
                 true
         );
 
         testBooks = List.of(testBook);
-        testBookResponses = List.of(testBookResponse);
+        testBookPage = new PageImpl<>(testBooks);
     }
 
     @Test
-    @DisplayName("Create book - Success case")
-    void createBook_Success() {
-        when(bookRepository.findByIsbn(any(String.class))).thenReturn(Optional.empty());
+    @DisplayName("Should create a new book successfully")
+    void shouldCreateNewBook() {
+        // Arrange
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.empty());
         when(bookMapper.toEntity(any(BookCreateRequest.class))).thenReturn(testBook);
         when(bookRepository.save(any(Book.class))).thenReturn(testBook);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        BookResponse actual = bookServiceImpl.createBook(testBookCreateRequest);
+        // Act
+        BookResponse result = bookService.createBook(testBookCreateRequest);
 
-        assertNotNull(actual);
-        assertEquals(testBookResponse.author(), actual.author());
-        assertEquals(testBookResponse.isbn(), actual.isbn());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testBookResponse.title(), result.title());
+        assertEquals(testBookResponse.isbn(), result.isbn());
 
+        // Verify
         verify(bookRepository).findByIsbn(testBookCreateRequest.isbn());
         verify(bookMapper).toEntity(testBookCreateRequest);
         verify(bookRepository).save(testBook);
         verify(bookMapper).toResponse(testBook);
-
     }
 
     @Test
-    @DisplayName("Get book by ID - Success case")
-    void getBookById_Success() {
-        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(testBook));
+    @DisplayName("Should throw exception when creating book with existing ISBN")
+    void shouldThrowExceptionWhenCreatingBookWithExistingIsbn() {
+        // Arrange
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.of(testBook));
+
+        // Act & Assert
+        assertThrows(ResourceAlreadyExistException.class, () -> bookService.createBook(testBookCreateRequest));
+
+        // Verify
+        verify(bookRepository).findByIsbn(testBookCreateRequest.isbn());
+        verify(bookRepository, never()).save(any(Book.class));
+    }
+
+    @Test
+    @DisplayName("Should get book by ID")
+    void shouldGetBookById() {
+        // Arrange
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(testBook));
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        BookResponse actual = bookServiceImpl.getBookById(1L);
+        // Act
+        BookResponse result = bookService.getBookById(1L);
 
-        assertNotNull(actual);
-        assertEquals(testBookResponse.id(), actual.id());
-        assertEquals(testBookResponse.title(), actual.title());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testBookResponse.id(), result.id());
+        assertEquals(testBookResponse.title(), result.title());
 
+        // Verify
         verify(bookRepository).findById(1L);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Get book by ID - Not found case")
-    void getBookById_NotFound() {
-        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+    @DisplayName("Should throw exception when book ID not found")
+    void shouldThrowExceptionWhenBookIdNotFound() {
+        // Arrange
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> bookServiceImpl.getBookById(1L));
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> bookService.getBookById(1L));
 
+        // Verify
         verify(bookRepository).findById(1L);
         verify(bookMapper, never()).toResponse(any(Book.class));
     }
 
     @Test
-    @DisplayName("Get book by ISBN - Success case")
-    void getBookByIsbn_Success() {
-        when(bookRepository.findByIsbn(any(String.class))).thenReturn(Optional.of(testBook));
+    @DisplayName("Should get book by ISBN")
+    void shouldGetBookByIsbn() {
+        // Arrange
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.of(testBook));
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        BookResponse actual = bookServiceImpl.getBookByIsbn("9780132350884");
+        // Act
+        BookResponse result = bookService.getBookByIsbn("9780132350884");
 
-        assertNotNull(actual);
-        assertEquals(testBookResponse.isbn(), actual.isbn());
-        assertEquals(testBookResponse.title(), actual.title());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testBookResponse.isbn(), result.isbn());
 
+        // Verify
         verify(bookRepository).findByIsbn("9780132350884");
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Get book by ISBN - Not found case")
-    void getBookByIsbn_NotFound() {
-        when(bookRepository.findByIsbn(any(String.class))).thenReturn(Optional.empty());
+    @DisplayName("Should throw exception when ISBN not found")
+    void shouldThrowExceptionWhenIsbnNotFound() {
+        // Arrange
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> bookServiceImpl.getBookByIsbn("9780132350884"));
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> bookService.getBookByIsbn("9780132350884"));
 
+        // Verify
         verify(bookRepository).findByIsbn("9780132350884");
         verify(bookMapper, never()).toResponse(any(Book.class));
     }
 
     @Test
-    @DisplayName("Get all books - Success case")
-    void getAllBooks_Success() {
-        Page<Book> bookPage = new PageImpl<>(testBooks);
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("title"));
-
-        when(bookRepository.findAll(any(Pageable.class))).thenReturn(bookPage);
+    @DisplayName("Should get all books with pagination")
+    void shouldGetAllBooksWithPagination() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
+        when(bookRepository.findAll(any(Pageable.class))).thenReturn(testBookPage);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        List<BookResponse> actual = bookServiceImpl.getAllBooks(0, 5, "title");
+        // Act
+        List<BookResponse> result = bookService.getAllBooks(0, 10, "title");
 
-        assertNotNull(actual);
-        assertEquals(1, actual.size());
-        assertEquals(testBookResponse.title(), actual.get(0).title());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testBookResponse.title(), result.get(0).title());
 
+        // Verify
         verify(bookRepository).findAll(pageable);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Update book - Success case")
-    void updateBook_Success() {
-        when(bookRepository.getBooksById(any(Long.class))).thenReturn(Optional.of(testBook));
+    @DisplayName("Should update book")
+    void shouldUpdateBook() {
+        // Arrange
+        when(bookRepository.getBooksById(anyLong())).thenReturn(Optional.of(testBook));
         when(bookRepository.save(any(Book.class))).thenReturn(testBook);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        BookResponse actual = bookServiceImpl.updateBook(1L, testBookUpdateRequest);
+        // Act
+        BookResponse result = bookService.updateBook(1L, testBookUpdateRequest);
 
-        assertNotNull(actual);
-        assertEquals(testBookResponse.id(), actual.id());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testBookResponse.id(), result.id());
 
+        // Verify
         verify(bookRepository).getBooksById(1L);
         verify(bookMapper).updateEntity(testBookUpdateRequest, testBook);
         verify(bookRepository).save(testBook);
@@ -219,130 +259,136 @@ class BookServiceUnitTest {
     }
 
     @Test
-    @DisplayName("Update book - Not found case")
-    void updateBook_NotFound() {
-        when(bookRepository.getBooksById(any(Long.class))).thenReturn(Optional.empty());
+    @DisplayName("Should throw exception when updating non-existent book")
+    void shouldThrowExceptionWhenUpdatingNonExistentBook() {
+        // Arrange
+        when(bookRepository.getBooksById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> bookServiceImpl.updateBook(1L, testBookUpdateRequest));
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> bookService.updateBook(1L, testBookUpdateRequest));
 
+        // Verify
         verify(bookRepository).getBooksById(1L);
         verify(bookMapper, never()).updateEntity(any(), any());
         verify(bookRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Delete book - Success case")
-    void deleteBook_Success() {
-        when(bookRepository.getBooksById(any(Long.class))).thenReturn(Optional.of(testBook));
+    @DisplayName("Should delete book")
+    void shouldDeleteBook() {
+        // Arrange
+        when(bookRepository.getBooksById(anyLong())).thenReturn(Optional.of(testBook));
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        BookResponse actual = bookServiceImpl.deleteBook(1L);
+        // Act
+        BookResponse result = bookService.deleteBook(1L);
 
-        assertNotNull(actual);
-        assertEquals(testBookResponse.id(), actual.id());
+        // Assert
+        assertNotNull(result);
+        assertEquals(testBookResponse.id(), result.id());
 
+        // Verify
         verify(bookRepository).getBooksById(1L);
         verify(bookRepository).delete(testBook);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Delete book - Not found case")
-    void deleteBook_NotFound() {
-        when(bookRepository.getBooksById(any(Long.class))).thenReturn(Optional.empty());
+    @DisplayName("Should throw exception when deleting non-existent book")
+    void shouldThrowExceptionWhenDeletingNonExistentBook() {
+        // Arrange
+        when(bookRepository.getBooksById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> bookServiceImpl.deleteBook(1L));
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> bookService.deleteBook(1L));
 
+        // Verify
         verify(bookRepository).getBooksById(1L);
         verify(bookRepository, never()).delete(any());
     }
 
     @Test
-    @DisplayName("Search books by title - Success case")
-    void searchBooksByTitle_Success() {
-        Page<Book> bookPage = new PageImpl<>(testBooks);
+    @DisplayName("Should search books by title")
+    void shouldSearchBooksByTitle() {
+        // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-
-        when(bookRepository.findByTitleContainingIgnoreCase(any(String.class), any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(testBookPage);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        List<BookResponse> actual = bookServiceImpl.searchBooksByTitle("Clean", 0, 10);
+        // Act
+        List<BookResponse> result = bookService.searchBooksByTitle("Clean", 0, 10);
 
-        assertNotNull(actual);
-        assertEquals(1, actual.size());
-        assertEquals(testBookResponse.title(), actual.get(0).title());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testBookResponse.title(), result.get(0).title());
 
+        // Verify
         verify(bookRepository).findByTitleContainingIgnoreCase("Clean", pageable);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Search books by author - Success case")
-    void searchBooksByAuthor_Success() {
-        Page<Book> bookPage = new PageImpl<>(testBooks);
+    @DisplayName("Should search books by author")
+    void shouldSearchBooksByAuthor() {
+        // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-
-        when(bookRepository.findByAuthorContainingIgnoreCase(any(String.class), any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.findByAuthorContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(testBookPage);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        List<BookResponse> actual = bookServiceImpl.searchBooksByAuthor("Martin", 0, 10);
+        // Act
+        List<BookResponse> result = bookService.searchBooksByAuthor("Martin", 0, 10);
 
-        assertNotNull(actual);
-        assertEquals(1, actual.size());
-        assertEquals(testBookResponse.author(), actual.get(0).author());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testBookResponse.author(), result.get(0).author());
 
+        // Verify
         verify(bookRepository).findByAuthorContainingIgnoreCase("Martin", pageable);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Search books by genre - Success case")
-    void searchBooksByGenre_Success() {
-        Page<Book> bookPage = new PageImpl<>(testBooks);
+    @DisplayName("Should search books by genre")
+    void shouldSearchBooksByGenre() {
+        // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-
-        when(bookMapper.stringToGenre(any(String.class))).thenReturn(Genre.SCIENCE);
-        when(bookRepository.findByGenre(any(Genre.class), any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.findByGenre(any(Genre.class), any(Pageable.class))).thenReturn(testBookPage);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        List<BookResponse> actual = bookServiceImpl.searchBooksByGenre("SCIENCE", 0, 10);
+        // Act
+        List<BookResponse> result = bookService.searchBooksByGenre("SCIENCE", 0, 10);
 
-        assertNotNull(actual);
-        assertEquals(1, actual.size());
-        assertEquals(testBookResponse.genre(), actual.get(0).genre());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testBookResponse.genre(), result.getFirst().genre());
 
+        // Verify
         verify(bookRepository).findByGenre(Genre.SCIENCE, pageable);
         verify(bookMapper).toResponse(testBook);
     }
 
     @Test
-    @DisplayName("Get available books - Success case")
-    void getAvailableBooks_Success() {
-        Page<Book> bookPage = new PageImpl<>(testBooks);
+    @DisplayName("Should get available books")
+    void shouldGetAvailableBooks() {
+        // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-
-        when(bookRepository.findAllByAvailableTrue(any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.findAllByAvailableTrue(any(Pageable.class))).thenReturn(testBookPage);
         when(bookMapper.toResponse(any(Book.class))).thenReturn(testBookResponse);
 
-        Page<BookResponse> actual = bookServiceImpl.getAvailableBooks(0, 10);
+        // Act
+        Page<BookResponse> result = bookService.getAvailableBooks(0, 10);
 
-        assertNotNull(actual);
-        assertEquals(1, actual.getTotalElements());
-        assertEquals(testBookResponse.available(), actual.getContent().get(0).available());
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(testBookResponse.title(), result.getContent().getFirst().title());
+        assertTrue(result.getContent().getFirst().available());
 
+        // Verify
         verify(bookRepository).findAllByAvailableTrue(pageable);
         verify(bookMapper).toResponse(testBook);
-    }
-
-    @Test
-    @DisplayName("Create book - Book already exists case")
-    void createBook_BookAlreadyExists() {
-        when(bookRepository.findByIsbn(any(String.class))).thenReturn(Optional.of(testBook));
-
-        assertThrows(ResourceAlreadyExistException.class, () -> bookServiceImpl.createBook(testBookCreateRequest));
-
-        verify(bookRepository).findByIsbn(testBookCreateRequest.isbn());
-        verify(bookMapper, never()).toEntity(any());
-        verify(bookRepository, never()).save(any());
     }
 }

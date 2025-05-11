@@ -63,10 +63,10 @@ public class Borrowing extends BaseEntity {
         return returnDate.isAfter(borrowDate) || returnDate.isEqual(borrowDate);
     }
 
-    @AssertTrue(message = "Due date must be after borrow date")
+    @AssertTrue(message = "Due date must be after or equal to borrow date")
     private boolean isDueDateValid() {
         if (dueDate == null || borrowDate == null) {
-            return true;
+            return true; // Will be caught by @NotNull if needed
         }
         return dueDate.isAfter(borrowDate) || dueDate.isEqual(borrowDate);
     }

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -15,13 +14,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tr.com.eaaslan.library.config.WebConfig;
 import tr.com.eaaslan.library.exception.ResourceAlreadyExistException;
 import tr.com.eaaslan.library.model.dto.auth.LoginRequest;
 import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
@@ -32,18 +31,18 @@ import tr.com.eaaslan.library.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import({AuthControllerTest.TestSecurityConfig.class, AuthControllerTest.TestConfig.class})
+@Import({AuthControllerTest.TestSecurityConfig.class, AuthControllerTest.TestConfig.class, WebConfig.class})
 class AuthControllerTest {
 
     @Autowired
@@ -86,13 +85,13 @@ class AuthControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginReq)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("fake-jwt-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.email").value("admin@test.com"))
                 .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
     }
-
 
     @Test
     @DisplayName("Should return 401 Unauthorized when credentials are invalid")
@@ -107,6 +106,7 @@ class AuthControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginReq)))
+                .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
@@ -133,7 +133,8 @@ class AuthControllerTest {
                 "ACTIVE",
                 3,
                 LocalDateTime.now(),
-                "system"
+                "system",
+                false
         );
 
         when(userService.createPatronUser(any(UserCreateRequest.class))).thenReturn(createdUser);
@@ -143,7 +144,8 @@ class AuthControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value("newuser@test.com"))
                 .andExpect(jsonPath("$.firstName").value("John"))
@@ -172,6 +174,7 @@ class AuthControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
+                .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("User already exists with email: 'existing@test.com'"));
     }

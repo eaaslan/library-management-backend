@@ -101,7 +101,7 @@ class UserControllerTest {
 
         UserResponse userResponse = new UserResponse(
                 1L, "test@example.com", "Test", "User", "05501234567",
-                "PATRON", "ACTIVE", 3, LocalDateTime.now(), "system");
+                "PATRON", "ACTIVE", 3, LocalDateTime.now(), "system", false);
 
         // Mock davranışı
         when(userService.createPatronUser(any(UserCreateRequest.class))).thenReturn(userResponse);

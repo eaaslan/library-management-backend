@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
 import tr.com.eaaslan.library.model.dto.Book.BookResponse;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/books")
 @RequiredArgsConstructor
+@EnableMethodSecurity
 @Tag(name = "Book Management", description = "APIs for managing books in the library")
 public class BookController {
 
@@ -108,6 +110,7 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "Book not found")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN') or hasRole('ADMIN')")
     public ResponseEntity<BookResponse> deleteBook(
             @Parameter(description = "Book ID", required = true)
             @PathVariable Long id) {

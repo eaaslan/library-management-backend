@@ -86,9 +86,9 @@ class BorrowingTest {
     @Test
     @DisplayName("Should identify overdue active borrowings correctly")
     void shouldIdentifyOverdueActiveBorrowingsCorrectly() {
-
+        // Arrange
         LocalDate pastDueDate = LocalDate.now().minusDays(1);
-        Borrowing borrowing = Borrowing.builder()
+        Borrowing overdueBorrowing = Borrowing.builder()
                 .user(testUser)
                 .book(testBook)
                 .borrowDate(LocalDate.now().minusDays(15))
@@ -96,14 +96,32 @@ class BorrowingTest {
                 .status(BorrowingStatus.ACTIVE)
                 .build();
 
-        assertTrue(borrowing.isOverdue(), "Borrowing should be overdue when due date is in the past");
+        Borrowing notOverdueBorrowing = Borrowing.builder()
+                .user(testUser)
+                .book(testBook)
+                .borrowDate(LocalDate.now().minusDays(5))
+                .dueDate(LocalDate.now().plusDays(5))  // Future date
+                .status(BorrowingStatus.ACTIVE)
+                .build();
 
-        Set<ConstraintViolation<Borrowing>> violations = validator.validate(borrowing);
-        assertFalse(violations.isEmpty(), "Borrowing should have validation violations");
-        boolean hasOverdueViolation = violations.stream()
-                .map(ConstraintViolation::getMessage)
-                .anyMatch(message -> message.equals("Due date must be today or in the future"));
-        assertTrue(hasOverdueViolation, "Borrowing should have overdue validation violation");
+        Borrowing returnedBorrowing = Borrowing.builder()
+                .user(testUser)
+                .book(testBook)
+                .borrowDate(LocalDate.now().minusDays(15))
+                .dueDate(pastDueDate)  // Past date, but already returned
+                .returnDate(LocalDate.now().minusDays(2))
+                .status(BorrowingStatus.RETURNED)
+                .build();
+
+        // Act & Assert
+        assertTrue(overdueBorrowing.isOverdue(),
+                "Borrowing should be identified as overdue when due date is in the past and status is ACTIVE");
+
+        assertFalse(notOverdueBorrowing.isOverdue(),
+                "Borrowing should not be identified as overdue when due date is in the future");
+
+        assertFalse(returnedBorrowing.isOverdue(),
+                "Borrowing should not be identified as overdue when already returned, even if due date is in the past");
     }
 
     @Test
