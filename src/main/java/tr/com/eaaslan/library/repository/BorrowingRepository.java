@@ -29,13 +29,9 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     List<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status);
 
-    long countByUserIdAndReturnedLateAndReturnDateBetween(Long userId, boolean returnedLate,
-                                                          LocalDate startDate, LocalDate endDate);
 
     void deleteByUserId(Long userId);
 
-    @Query("SELECT MAX(b.borrowDate) FROM Borrowing b WHERE b.user.id = :userId")
-    LocalDate findLatestActivityDateByUserId(@Param("userId") Long userId);
 
     // Find overdue borrowings
     @Query("SELECT b FROM Borrowing b WHERE b.status = 'OVERDUE'")
@@ -49,4 +45,11 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     // Find by book ID and status
     List<Borrowing> findByBookIdAndStatus(Long bookId, BorrowingStatus status);
+
+    //For Penalty Service
+    long countByUserIdAndReturnedLateAndReturnDateBetween(Long userId, boolean returnedLate,
+                                                          LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT MAX(b.borrowDate) FROM Borrowing b WHERE b.user.id = :userId")
+    LocalDate findLatestActivityDateByUserId(@Param("userId") Long userId);
 }

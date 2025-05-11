@@ -31,9 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByRoleAndStatus(UserRole role, UserStatus status, Pageable pageable);
 
     List<User> findAllByStatus(UserStatus status);
-
-    List<User> findByStatusAndSuspensionEndDateBefore(UserStatus status, LocalDate date);
-
+    
     // Add this new method for improved name searching
     @Query("SELECT u FROM User u WHERE " +
             "LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
@@ -43,4 +41,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     Page<User> findAllByStatus(UserStatus status, Pageable pageable);
+
+    List<User> findByStatusAndSuspensionEndDateBefore(UserStatus status, LocalDate date);
 }
