@@ -1,17 +1,49 @@
+version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:15
     container_name: library-postgres
-    restart: always
     environment:
+      POSTGRES_DB: library_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: library_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - library-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: library-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+    ports:
+      - "8080:8080"
+    networks:
+      - library-network
+
+    secrets:
+      - jwt_secret
+
+networks:
+  library-network:
+    driver: bridge
 
 volumes:
-  pgdata:
+  postgres-data:
+
+secrets:
+  jwt_secret:
+    file: ./jwt_secret.txt

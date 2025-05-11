@@ -13,6 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import tr.com.eaaslan.library.service.BookServiceImpl;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,7 +25,9 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${spring.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")
+    @Value("${spring.jwt.secret:}")
+    private String configuredSecretKey;
+
     private String secretKey;
 
     @Value("${spring.jwt.expiration-ms:86400000}") // 24 hours by default
@@ -30,10 +35,33 @@ public class JwtUtil {
 
     private Key key;
 
+    private final static Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+
 
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        try {
+            Path secretPath = Paths.get("/run/secrets/jwt_secret");
+            if (Files.exists(secretPath)) {
+                secretKey = Files.readString(secretPath).trim();
+                logger.info("JWT secret loaded from Docker secrets");
+            } else if (!configuredSecretKey.isEmpty()) {
+
+                secretKey = configuredSecretKey;
+                logger.info("JWT secret loaded from configuration");
+            } else {
+
+                secretKey = "defaultsecretkeyforlibraryapplicationdevelopment";
+                logger.warn("Using default JWT secret key. This is NOT recommended for production!");
+            }
+            this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        } catch (Exception e) {
+            logger.error("Error loading JWT secret: {}", e.getMessage());
+          
+            secretKey = "defaultsecretkeyforlibraryapplicationdevelopment";
+            this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        }
     }
 
     public String generateToken(Authentication authentication) {
