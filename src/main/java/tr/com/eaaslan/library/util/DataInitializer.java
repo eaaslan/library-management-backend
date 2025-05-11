@@ -42,11 +42,9 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         log.info("Starting data initialization...");
-
-        // Create users with separate transaction
+        
         createUsers();
 
-        // Create books with separate transaction
         List<Long> bookIds = createBooks();
 
         // Create borrowings with separate transaction
