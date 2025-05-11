@@ -1,49 +1,29 @@
 package tr.com.eaaslan.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tr.com.eaaslan.library.config.WebConfig;
-import tr.com.eaaslan.library.exception.ResourceAlreadyExistException;
 import tr.com.eaaslan.library.model.dto.auth.LoginRequest;
 import tr.com.eaaslan.library.model.dto.user.UserCreateRequest;
-import tr.com.eaaslan.library.model.dto.user.UserResponse;
+import tr.com.eaaslan.library.repository.BorrowingRepository;
+import tr.com.eaaslan.library.repository.UserRepository;
 import tr.com.eaaslan.library.security.JwtUtil;
-import tr.com.eaaslan.library.security.LibraryUserDetails;
 import tr.com.eaaslan.library.service.UserService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
-@Import({AuthControllerTest.TestSecurityConfig.class, AuthControllerTest.TestConfig.class, WebConfig.class})
-class AuthControllerTest {
+@AutoConfigureMockMvc
+class AuthControllerTest extends AbstractControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,63 +31,22 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private AuthenticationManager authenticationManager;
-
-    @MockitoBean
+    @Autowired
     private JwtUtil jwtUtil;
 
-    @MockitoBean
+    @Autowired
     private UserService userService;
 
-    @Test
-    @DisplayName("Should login successfully with valid credentials")
-    void shouldLoginSuccessfullyWithValidCredentials() throws Exception {
-        // Arrange
-        var loginReq = new LoginRequest("admin@test.com", "securePass");
-        Authentication auth = mock(Authentication.class);
-        when(authenticationManager.authenticate(any())).thenReturn(auth);
+    @Autowired
+    private UserRepository userRepository;
 
-        LibraryUserDetails userDetails = mock(LibraryUserDetails.class);
-        when(userDetails.getUsername()).thenReturn("admin@test.com");
+    @Autowired
+    private BorrowingRepository borrowingRepository;
 
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-
-        doReturn(authorities).when(userDetails).getAuthorities();
-
-        when(auth.getPrincipal()).thenReturn(userDetails);
-
-        when(jwtUtil.generateToken(auth)).thenReturn("fake-jwt-token");
-        when(jwtUtil.getExpirationTimeInSeconds("fake-jwt-token")).thenReturn(3600L);
-
-        mockMvc.perform(post("/api/v1/auth/login")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginReq)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("fake-jwt-token"))
-                .andExpect(jsonPath("$.expiresIn").value(3600))
-                .andExpect(jsonPath("$.email").value("admin@test.com"))
-                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
-    }
-
-    @Test
-    @DisplayName("Should return 401 Unauthorized when credentials are invalid")
-    void shouldReturnUnauthorizedForInvalidCredentials() throws Exception {
-        // Arrange
-        var loginReq = new LoginRequest("user@test.com", "wrongPass");
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Bad credentials"));
-
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/auth/login")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginReq)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
+    @BeforeEach
+    void setUp() {
+        borrowingRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -123,22 +62,6 @@ class AuthControllerTest {
                 "123 Main St"
         );
 
-        UserResponse createdUser = new UserResponse(
-                1L,
-                "newuser@test.com",
-                "John",
-                "Doe",
-                "05501234567",
-                "PATRON",
-                "ACTIVE",
-                3,
-                LocalDateTime.now(),
-                "system",
-                false
-        );
-
-        when(userService.createPatronUser(any(UserCreateRequest.class))).thenReturn(createdUser);
-
         // Act & Assert
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
@@ -146,7 +69,6 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value("newuser@test.com"))
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"))
@@ -156,48 +78,95 @@ class AuthControllerTest {
     @Test
     @DisplayName("Should return 409 Conflict when registering with existing email")
     void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
-        // Arrange
-        UserCreateRequest registerRequest = new UserCreateRequest(
+        // Arrange - Create a user first
+        UserCreateRequest initialUser = new UserCreateRequest(
                 "existing@test.com",
                 "password123",
-                "John",
-                "Doe",
+                "Existing",
+                "User",
                 "05501234567",
                 "123 Main St"
         );
 
-        when(userService.createPatronUser(any(UserCreateRequest.class)))
-                .thenThrow(new ResourceAlreadyExistException("User", "email", "existing@test.com"));
-
-        // Act & Assert
+        // Register the user first
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerRequest)))
+                        .content(objectMapper.writeValueAsString(initialUser)))
+                .andExpect(status().isCreated());
+
+        // Try to register with the same email
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(initialUser)))
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("User already exists with email: 'existing@test.com'"));
     }
 
-    @TestConfiguration
-    static class TestSecurityConfig {
-        @Bean
-        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/v1/auth/**").permitAll()
-                            .anyRequest().authenticated()
-                    )
-                    .build();
-        }
+    @Test
+    @DisplayName("Should login successfully with valid credentials")
+    void shouldLoginSuccessfullyWithValidCredentials() throws Exception {
+        // Arrange - Create a user first
+        UserCreateRequest userRequest = new UserCreateRequest(
+                "login@test.com",
+                "securePass",
+                "Login",
+                "User",
+                "05501234568",
+                "123 Main St"
+        );
+
+        // Register the user
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isCreated());
+
+        // Login attempt
+        LoginRequest loginReq = new LoginRequest("login@test.com", "securePass");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginReq)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.email").value("login@test.com"))
+                .andExpect(jsonPath("$.role").value("ROLE_PATRON"));
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+    @Test
+    @DisplayName("Should return 401 Unauthorized when credentials are invalid")
+    void shouldReturnUnauthorizedForInvalidCredentials() throws Exception {
+        // Arrange - Create a user first
+        UserCreateRequest userRequest = new UserCreateRequest(
+                "auth@test.com",
+                "correctPass",
+                "Auth",
+                "User",
+                "05501234569",
+                "123 Main St"
+        );
+
+        // Register the user
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
+                .andExpect(status().isCreated());
+
+        // Wrong login attempt
+        LoginRequest loginReq = new LoginRequest("auth@test.com", "wrongPass");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginReq)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }

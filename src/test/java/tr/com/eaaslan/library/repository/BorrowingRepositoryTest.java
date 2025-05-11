@@ -11,9 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ActiveProfiles;
 import tr.com.eaaslan.library.config.TestJpaConfig;
 import tr.com.eaaslan.library.model.*;
 
@@ -25,12 +23,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Testcontainers
+@ActiveProfiles("test")
 @Import(TestJpaConfig.class)
-public class BorrowingRepositoryTest {
-
-    @Container
-    static PostgreSQLContainer container = new PostgreSQLContainer("postgres:15");
+class BorrowingRepositoryTest {
 
     @Autowired
     private BorrowingRepository borrowingRepository;
@@ -152,11 +147,6 @@ public class BorrowingRepositoryTest {
 
     }
 
-    @Test
-    @DisplayName("Should connect to database")
-    void testConnection() {
-        assertTrue(container.isRunning());
-    }
 
     @Test
     @DisplayName("Should find all borrowings")

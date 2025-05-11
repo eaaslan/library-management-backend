@@ -34,14 +34,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Integration test class - Tests the security configuration of BorrowingController
- * in a real environment setting.
+ * in a real environment setting with containerized PostgreSQL.
  * <p>
  * This test class starts the full Spring Boot application context and loads all
- * application components including the security configuration.
+ * application components including the security configuration and database.
  */
-@SpringBootTest
 @AutoConfigureMockMvc
-class BorrowingControllerSecurityIntegrationTest {
+class BorrowingControllerSecurityIntegrationTest extends AbstractControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

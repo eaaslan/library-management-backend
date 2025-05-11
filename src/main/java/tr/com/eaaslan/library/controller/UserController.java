@@ -27,16 +27,16 @@ public class UserController {
         this.securityService = securityService;
     }
 
-//    @Operation(
-//            summary = "Create user",
-//            description = "Creates a new user with the provided information"
-//    )
-//    @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
-//        UserResponse createdUser = userService.createLibrarianUser(userCreateRequest);
-//        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-//    }
+    @Operation(
+            summary = "Create user",
+            description = "Creates a new user with the provided information"
+    )
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
+        UserResponse createdUser = userService.createPatronUser(userCreateRequest);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
 
     @Operation(
             summary = "Create librarian",

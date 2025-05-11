@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -29,14 +30,10 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-//@ActiveProfiles("test")
-@Testcontainers
+@ActiveProfiles("test")
 @Import(TestJpaConfig.class)
 class BookRepositoryTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
-
+    
     @Autowired
     private BookRepository bookRepository;
 
@@ -48,11 +45,6 @@ class BookRepositoryTest {
         bookRepository.saveAll(books);
     }
 
-    @Test
-    @DisplayName("Should connect to database")
-    void testConnection() {
-        assertTrue(postgres.isRunning());
-    }
 
     @Test
     @DisplayName("Should find all books")

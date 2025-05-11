@@ -1,55 +1,36 @@
 package tr.com.eaaslan.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.http.HttpMethod;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tr.com.eaaslan.library.exception.ResourceAlreadyExistException;
-import tr.com.eaaslan.library.exception.ResourceNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import tr.com.eaaslan.library.model.Book;
+import tr.com.eaaslan.library.model.Genre;
 import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.Book.BookResponse;
 import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
-import tr.com.eaaslan.library.security.JwtUtil;
+import tr.com.eaaslan.library.repository.BookRepository;
+import tr.com.eaaslan.library.repository.UserRepository;
 import tr.com.eaaslan.library.service.BookService;
-import tr.com.eaaslan.library.service.UserService;
-import tr.com.eaaslan.library.service.UserServiceImpl;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Year;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(BookController.class)
-@Import({BookControllerTest.TestConfig.class, BookControllerTest.TestSecurityConfig.class})
-class BookControllerTest {
+@AutoConfigureMockMvc
+@Transactional
+class BookControllerTest extends AbstractControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,51 +41,46 @@ class BookControllerTest {
     @Autowired
     private BookService bookService;
 
-    @MockitoBean
-    private AuthenticationManager authenticationManager;
+    @Autowired
+    private BookRepository bookRepository;
 
-    @MockitoBean
-    private JwtUtil jwtUtil;
-
-    @MockitoBean
-    private UserServiceImpl userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        // Reset mocks before each test to ensure clean state
-        reset(bookService);
+        // Temizleme işlemleri
+        bookRepository.deleteAll();
+
+        // Test verilerini oluştur
+        Book testBook = Book.builder()
+                .isbn("9780132350884")
+                .title("Clean Code")
+                .author("Robert C. Martin")
+                .publicationYear(Year.of(2008))
+                .publisher("Prentice Hall")
+                .genre(Genre.SCIENCE)
+                .imageUrl("http://example.com/cover.jpg")
+                .description("A handbook of agile software craftsmanship")
+                .available(true)
+                .quantity(3)
+                .build();
+
+        bookRepository.save(testBook);
     }
 
-    // Test data preparation
-    private BookResponse createTestBookResponse(Long id) {
-        return new BookResponse(
-                id,
-                "9780132350884",
-                "Clean Code",
-                "Robert C. Martin",
-                2008,
-                "Prentice Hall",
-                "SCIENCE",
-                "http://example.com/cover.jpg",
-                "A handbook of agile software craftsmanship",
-                3,
-                true,
-                LocalDateTime.now(),
-                "system"
-        );
-    }
-
+    // Test veri hazırlama metodları
     private BookCreateRequest createTestBookRequest() {
         return new BookCreateRequest(
-                "9780132350884",
-                "Clean Code",
-                "Robert C. Martin",
-                2008,
-                "Prentice Hall",
+                "9781234567890", // Farklı bir ISBN kullan
+                "Test Driven Development",
+                "Kent Beck",
+                2002,
+                "Addison-Wesley",
                 "SCIENCE",
-                "http://example.com/cover.jpg",
-                "A handbook of agile software craftsmanship",
-                3
+                "http://example.com/tdd.jpg",
+                "Guide to Test Driven Development",
+                2
         );
     }
 
@@ -126,74 +102,47 @@ class BookControllerTest {
     @Test
     @DisplayName("Should return all books with pagination")
     void shouldReturnAllBooksWithPagination() throws Exception {
-        // Arrange
-        List<BookResponse> books = List.of(
-                createTestBookResponse(1L),
-                createTestBookResponse(2L)
-        );
-        when(bookService.getAllBooks(anyInt(), anyInt(), anyString())).thenReturn(books);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sortBy", "title"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].title", is("Clean Code")))
-                .andExpect(jsonPath("$[1].id", is(2)));
-
-        verify(bookService).getAllBooks(0, 10, "title");
+                .andExpect(jsonPath("$[0].author", is("Robert C. Martin")));
     }
 
     @Test
     @DisplayName("Should return book by ID")
     void shouldReturnBookById() throws Exception {
-        // Arrange
-        BookResponse book = createTestBookResponse(1L);
-        when(bookService.getBookById(1L)).thenReturn(book);
+        // Kitap ID'sini veritabanından al
+        Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/books/1"))
+        mockMvc.perform(get("/api/v1/books/" + bookId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.title", is("Clean Code")))
                 .andExpect(jsonPath("$.author", is("Robert C. Martin")));
-
-        verify(bookService).getBookById(1L);
     }
 
     @Test
     @DisplayName("Should return 404 when book ID not found")
     void shouldReturn404WhenBookIdNotFound() throws Exception {
-        // Arrange
-        when(bookService.getBookById(999L))
-                .thenThrow(new ResourceNotFoundException("Book", "ID", 999L));
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message", is("Book not found with ID: '999'")));
-
-        verify(bookService).getBookById(999L);
+                .andExpect(jsonPath("$.message").value("Book not found with ID: '999'"));
     }
 
     @Test
     @DisplayName("Should return book by ISBN")
     void shouldReturnBookByIsbn() throws Exception {
-        // Arrange
-        BookResponse book = createTestBookResponse(1L);
-        when(bookService.getBookByIsbn("9780132350884")).thenReturn(book);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/isbn/9780132350884"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.isbn", is("9780132350884")))
                 .andExpect(jsonPath("$.title", is("Clean Code")));
-
-        verify(bookService).getBookByIsbn("9780132350884");
     }
 
     @Test
@@ -202,20 +151,17 @@ class BookControllerTest {
     void shouldCreateNewBookWhenAuthenticatedAsLibrarian() throws Exception {
         // Arrange
         BookCreateRequest request = createTestBookRequest();
-        BookResponse response = createTestBookResponse(1L);
-        when(bookService.createBook(any(BookCreateRequest.class))).thenReturn(response);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/books")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.title", is("Clean Code")))
-                .andExpect(jsonPath("$.isbn", is("9780132350884")));
-
-        verify(bookService).createBook(any(BookCreateRequest.class));
+                .andExpect(jsonPath("$.title", is("Test Driven Development")))
+                .andExpect(jsonPath("$.author", is("Kent Beck")))
+                .andExpect(jsonPath("$.isbn", is("9781234567890")));
     }
 
     @Test
@@ -231,18 +177,24 @@ class BookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
-
-        // Remove the verify call since it's not reliable in this context
     }
 
     @Test
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("Should return conflict when creating book with existing ISBN")
     void shouldReturnConflictWhenCreatingBookWithExistingIsbn() throws Exception {
-        // Arrange
-        BookCreateRequest request = createTestBookRequest();
-        when(bookService.createBook(any(BookCreateRequest.class)))
-                .thenThrow(new ResourceAlreadyExistException("Book", "ISBN", "9780132350884"));
+        // Arrange - Aynı ISBN ile yeni bir kitap oluştur
+        BookCreateRequest request = new BookCreateRequest(
+                "9780132350884", // Var olan ISBN
+                "Clean Code (Duplicate)",
+                "Robert C. Martin",
+                2008,
+                "Prentice Hall",
+                "SCIENCE",
+                "http://example.com/cover.jpg",
+                "Duplicate book test",
+                1
+        );
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/books")
@@ -250,9 +202,7 @@ class BookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message", is("Book already exists with ISBN: '9780132350884'")));
-
-        verify(bookService).createBook(any(BookCreateRequest.class));
+                .andExpect(jsonPath("$.message").value("Book already exists with ISBN: '9780132350884'"));
     }
 
     @Test
@@ -261,35 +211,17 @@ class BookControllerTest {
     void shouldUpdateBookWhenAuthenticatedAsLibrarian() throws Exception {
         // Arrange
         BookUpdateRequest request = createTestBookUpdateRequest();
-        BookResponse updatedBook = new BookResponse(
-                1L,
-                "9780132350884",
-                "Clean Code: Updated Title",
-                "Robert C. Martin",
-                2008,
-                "Prentice Hall",
-                "SCIENCE",
-                "http://example.com/cover.jpg",
-                "Updated description for the book",
-                5,
-                true,
-                LocalDateTime.now(),
-                "system"
-        );
-        when(bookService.updateBook(eq(1L), any(BookUpdateRequest.class))).thenReturn(updatedBook);
+        Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
         // Act & Assert
-        mockMvc.perform(put("/api/v1/books/1")
+        mockMvc.perform(put("/api/v1/books/" + bookId)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.title", is("Clean Code: Updated Title")))
                 .andExpect(jsonPath("$.description", is("Updated description for the book")))
                 .andExpect(jsonPath("$.quantity", is(5)));
-
-        verify(bookService).updateBook(eq(1L), any(BookUpdateRequest.class));
     }
 
     @Test
@@ -297,26 +229,22 @@ class BookControllerTest {
     @DisplayName("Should delete a book when authenticated as librarian")
     void shouldDeleteBookWhenAuthenticatedAsLibrarian() throws Exception {
         // Arrange
-        BookResponse deletedBook = createTestBookResponse(1L);
-        when(bookService.deleteBook(1L)).thenReturn(deletedBook);
+        Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/books/1")
+        mockMvc.perform(delete("/api/v1/books/" + bookId)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.title", is("Clean Code")));
 
-        verify(bookService).deleteBook(1L);
+        // Kitabın silindiğini doğrula
+        mockMvc.perform(get("/api/v1/books/" + bookId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("Should search books by title")
     void shouldSearchBooksByTitle() throws Exception {
-        // Arrange
-        List<BookResponse> books = List.of(createTestBookResponse(1L));
-        when(bookService.searchBooksByTitle(eq("Clean"), anyInt(), anyInt())).thenReturn(books);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/search/title/Clean")
                         .param("page", "0")
@@ -324,17 +252,11 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].title", is("Clean Code")));
-
-        verify(bookService).searchBooksByTitle(eq("Clean"), anyInt(), anyInt());
     }
 
     @Test
     @DisplayName("Should search books by author")
     void shouldSearchBooksByAuthor() throws Exception {
-        // Arrange
-        List<BookResponse> books = List.of(createTestBookResponse(1L));
-        when(bookService.searchBooksByAuthor(eq("Martin"), anyInt(), anyInt())).thenReturn(books);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/search/author/Martin")
                         .param("page", "0")
@@ -342,17 +264,11 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].author", is("Robert C. Martin")));
-
-        verify(bookService).searchBooksByAuthor(eq("Martin"), anyInt(), anyInt());
     }
 
     @Test
     @DisplayName("Should search books by genre")
     void shouldSearchBooksByGenre() throws Exception {
-        // Arrange
-        List<BookResponse> books = List.of(createTestBookResponse(1L));
-        when(bookService.searchBooksByGenre(eq("SCIENCE"), anyInt(), anyInt())).thenReturn(books);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/search/genre/SCIENCE")
                         .param("page", "0")
@@ -360,17 +276,11 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].genre", is("SCIENCE")));
-
-        verify(bookService).searchBooksByGenre(eq("SCIENCE"), anyInt(), anyInt());
     }
 
     @Test
     @DisplayName("Should get available books")
     void shouldGetAvailableBooks() throws Exception {
-        // Arrange
-        Page<BookResponse> books = new PageImpl<>(List.of(createTestBookResponse(1L)));
-        when(bookService.getAvailableBooks(anyInt(), anyInt())).thenReturn(books);
-
         // Act & Assert
         mockMvc.perform(get("/api/v1/books/available")
                         .param("page", "0")
@@ -378,72 +288,5 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].available", is(true)));
-
-        verify(bookService).getAvailableBooks(anyInt(), anyInt());
     }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public BookService bookService() {
-            return mock(BookService.class);
-        }
-    }
-
-    @TestConfiguration
-    @EnableMethodSecurity
-    static class TestSecurityConfig {
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers(HttpMethod.POST, "/api/v1/books").hasAnyRole("LIBRARIAN", "ADMIN")
-                            .requestMatchers(HttpMethod.PUT, "/api/v1/books/**").hasAnyRole("LIBRARIAN", "ADMIN")
-                            .requestMatchers(HttpMethod.DELETE, "/api/v1/books/**").hasAnyRole("LIBRARIAN", "ADMIN")
-                            .requestMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
-                            .anyRequest().authenticated()
-                    )
-                    .exceptionHandling(ex -> ex
-                            .accessDeniedHandler((request, response, accessDeniedException) -> {
-                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                                Map<String, Object> body = new HashMap<>();
-                                body.put("status", HttpServletResponse.SC_FORBIDDEN);
-                                body.put("message", "Access Denied");
-                                response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-                            })
-                    )
-                    .build();
-        }
-    }
-//
-
-//    @TestConfiguration
-//    static class TestSecurityConfig {
-//        @Bean
-//        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//            return http
-//                    .csrf(AbstractHttpConfigurer::disable)
-//                    .authorizeHttpRequests(auth -> auth
-//                            // Method-specific rules should come FIRST (more specific)
-//                            .requestMatchers(POST, "/api/v1/books").hasAnyRole("LIBRARIAN", "ADMIN")
-//                            .requestMatchers(PUT, "/api/v1/books/**").hasAnyRole("LIBRARIAN", "ADMIN")
-//                            .requestMatchers(DELETE, "/api/v1/books/**").hasAnyRole("LIBRARIAN", "ADMIN")
-//                            // Then general permitted access (less specific)
-//                            .requestMatchers(GET, "/api/v1/books").permitAll()
-//                            .requestMatchers(GET, "/api/v1/books/**").permitAll()
-//                            .requestMatchers(GET, "/api/v1/books/search/**").permitAll()
-//                            .requestMatchers(GET, "/api/v1/books/isbn/**").permitAll()
-//                            .requestMatchers(GET, "/api/v1/books/available").permitAll()
-//                            .anyRequest().authenticated()
-//                    )
-//                    .build();
-//        }
-//
-//        @Bean
-//        public BookService bookService() {
-//            return mock(BookService.class);
-//        }
-//    }
 }
