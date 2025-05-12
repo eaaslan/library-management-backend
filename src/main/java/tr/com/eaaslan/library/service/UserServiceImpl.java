@@ -122,26 +122,33 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse deleteUser(Long id, String userName) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Borrowing> activeBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.ACTIVE, pageable);
+
+        // Get both ACTIVE and OVERDUE borrowings
+        List<Borrowing> activeBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.ACTIVE);
+        List<Borrowing> overdueBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.OVERDUE);
 
         if (!activeBorrowings.isEmpty()) {
             processActiveBorrowingsForDeletedUser(activeBorrowings);
         }
 
+        if (!overdueBorrowings.isEmpty()) {
+            processOverdueBorrowingsForDeletedUser(overdueBorrowings);
+        }
+
+        user.setStatus(UserStatus.DELETED);
         user.setDeleted(true);
-        user.setDeletedAt(java.time.LocalDateTime.now());
+        user.setDeletedAt(LocalDateTime.now());
         user.setDeletedBy(userName);
 
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
 
-    private void processActiveBorrowingsForDeletedUser(Page<Borrowing> activeBorrowings) {
-
+    private void processActiveBorrowingsForDeletedUser(List<Borrowing> activeBorrowings) {
         for (Borrowing borrowing : activeBorrowings) {
             borrowing.setStatus(BorrowingStatus.RETURNED);
             borrowing.setReturnDate(LocalDate.now());
+            borrowing.setReturnedLate(false); // Active borrowings are not late
             borrowingRepository.save(borrowing);
 
             Book book = borrowing.getBook();
@@ -149,12 +156,27 @@ public class UserServiceImpl implements UserService {
             if (!book.isAvailable()) {
                 book.setAvailable(true);
             }
-
             bookRepository.save(book);
         }
         borrowingRepository.saveAll(activeBorrowings);
     }
 
+    private void processOverdueBorrowingsForDeletedUser(List<Borrowing> overdueBorrowings) {
+        for (Borrowing borrowing : overdueBorrowings) {
+            borrowing.setStatus(BorrowingStatus.RETURNED);
+            borrowing.setReturnDate(LocalDate.now());
+            borrowing.setReturnedLate(true); // Overdue borrowings are returned late
+            borrowingRepository.save(borrowing);
+
+            Book book = borrowing.getBook();
+            book.setQuantity(book.getQuantity() + 1);
+            if (!book.isAvailable()) {
+                book.setAvailable(true);
+            }
+            bookRepository.save(book);
+        }
+        borrowingRepository.saveAll(overdueBorrowings);
+    }
 
     @Override
     @Transactional
@@ -175,32 +197,30 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
 
-        List<Borrowing> activeBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.ACTIVE);
+        // Get ALL borrowings for the user
+        List<Borrowing> allBorrowings = borrowingRepository.findByUserId(user.getId(), Pageable.unpaged()).getContent();
 
-        if (!activeBorrowings.isEmpty()) {
-            processActiveBorrowingsForHardDeletedUser((activeBorrowings));
+        if (!allBorrowings.isEmpty()) {
+            // First handle book quantities for non-returned borrowings
+            for (Borrowing borrowing : allBorrowings) {
+                if (borrowing.getStatus() != BorrowingStatus.RETURNED) {
+                    Book book = borrowing.getBook();
+                    book.setQuantity(book.getQuantity() + 1);
+                    if (!book.isAvailable()) {
+                        book.setAvailable(true);
+                    }
+                    bookRepository.save(book);
+                }
+            }
+
+            // Then delete all borrowings
+            borrowingRepository.deleteAll(allBorrowings);
         }
-        userRepository.delete(user);
 
+        userRepository.delete(user);
         return userMapper.toResponse(user);
     }
-
-    private void processActiveBorrowingsForHardDeletedUser(List<Borrowing> activeBorrowings) {
-
-        for (Borrowing borrowing : activeBorrowings) {
-            borrowing.setStatus(BorrowingStatus.RETURNED);
-            borrowing.setReturnDate(LocalDate.now());
-            borrowing.setUser(null);
-            borrowingRepository.save(borrowing);
-
-            Book book = borrowing.getBook();
-            book.setQuantity(book.getQuantity() + 1);
-            if (!book.isAvailable()) {
-                book.setAvailable(true);
-            }
-            bookRepository.save(book);
-        }
-    }
+    
 
     @Override
     @Transactional(readOnly = true)

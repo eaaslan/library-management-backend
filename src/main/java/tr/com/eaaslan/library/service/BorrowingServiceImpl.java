@@ -44,7 +44,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Override
     @Transactional
     public BorrowingResponse borrowBook(BorrowingCreateRequest request, String currentUserEmail) {
-        // Get the current user
+
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", currentUserEmail));
 
@@ -55,8 +55,11 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new InvalidUserStatusException(currentUserEmail, currentUser.getStatus().toString());
         }
 
-        if (borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE) >=
-                currentUser.getMaxAllowedBorrows()) {
+        long activeBorrowings = borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.ACTIVE);
+        long overdueBorrowings = borrowingRepository.countByUserIdAndStatus(currentUser.getId(), BorrowingStatus.OVERDUE);
+        long totalUnreturnedBorrowings = activeBorrowings + overdueBorrowings;
+
+        if (totalUnreturnedBorrowings >= currentUser.getMaxAllowedBorrows()) {
             throw new BorrowingLimitExceededException(currentUser.getMaxAllowedBorrows());
         }
 
@@ -72,25 +75,20 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new AlreadyBorrowedException(request.bookId(), currentUserEmail);
         }
 
-        // Handle due date with validation
         LocalDate today = LocalDate.now();
         LocalDate dueDate;
 
-        // If due date is provided, validate it
         if (request.dueDate() != null) {
             dueDate = request.dueDate();
 
-            // Check that due date is not in the past
             if (dueDate.isBefore(today)) {
                 throw new InvalidDueDateException("Due date cannot be in the past");
             }
 
-            // Check that due date is not too far in the future (max 30 days)
             if (dueDate.isAfter(today.plusDays(30))) {
                 throw new InvalidDueDateException("Due date cannot be more than 30 days from today");
             }
         } else {
-            // Set default due date (14 days from today)
             dueDate = today.plusDays(DEFAULT_BORROW_DAYS);
         }
 
@@ -102,10 +100,8 @@ public class BorrowingServiceImpl implements BorrowingService {
                 .status(BorrowingStatus.ACTIVE)
                 .build();
 
-        // Save the borrowing record
         borrowing = borrowingRepository.save(borrowing);
 
-        // Update book availability
         book.setQuantity(book.getQuantity() - 1);
         if (book.getQuantity() <= 0) {
             book.setAvailable(false);
@@ -118,47 +114,40 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Override
     @Transactional
     public BorrowingResponse returnBook(Long id, BorrowingReturnRequest request, String currentUserEmail) {
-        // Get the current user
+
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", currentUserEmail));
 
-        // Get the borrowing record
         Borrowing borrowing = borrowingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrowing", "ID", id));
 
-        // Check if the current user is authorized to return this book
         if (!borrowing.getUser().getId().equals(currentUser.getId()) &&
                 currentUser.getRole() != UserRole.LIBRARIAN &&
                 currentUser.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("You can only return books borrowed by yourself");
         }
 
-        // Check if the book is already returned
         if (borrowing.getStatus() == BorrowingStatus.RETURNED) {
             throw new BookAlreadyReturnedException(id);
         }
 
-        // Update borrowing status
         LocalDate returnDate = request.returnDate() != null ?
                 request.returnDate() : LocalDate.now();
 
         borrowing.setReturnDate(returnDate);
         borrowing.setStatus(BorrowingStatus.RETURNED);
 
-        // Check if the book is returned late and set the flag
         if (returnDate.isAfter(borrowing.getDueDate())) {
             borrowing.setReturnedLate(true);
             log.info("Book returned late: {} days overdue",
                     returnDate.toEpochDay() - borrowing.getDueDate().toEpochDay());
         }
 
-        // Update book availability
         Book book = borrowing.getBook();
         book.setQuantity(book.getQuantity() + 1);
         book.setAvailable(true);
         bookRepository.save(book);
 
-        // Save the updated borrowing record
         Borrowing updatedBorrowing = borrowingRepository.save(borrowing);
         log.info("Book returned: {}, by user: {}", book.getTitle(), borrowing.getUser().getEmail());
 
@@ -176,7 +165,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Override
     @Transactional(readOnly = true)
     public Page<BorrowingResponse> getBorrowingsByUser(Long userId, int page, int size) {
-        // Verify user exists
+
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
 
@@ -197,7 +186,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     @Override
     @Transactional(readOnly = true)
     public Page<BorrowingResponse> getBorrowingsByBook(Long bookId, int page, int size) {
-        // Verify book exists
+
         bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "ID", bookId));
 
@@ -226,7 +215,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     @Transactional
     public void updateOverdueStatus() {
-        // Update overdue status for active borrowings
+
         LocalDateTime now = LocalDateTime.now();
         Page<Borrowing> activeBorrowings = borrowingRepository.findByStatus(
                 BorrowingStatus.ACTIVE,

@@ -29,6 +29,8 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     List<Borrowing> findByUserIdAndStatus(Long userId, BorrowingStatus status);
 
+    void deleteByBookId(Long bookId);
+
 
     void deleteByUserId(Long userId);
 

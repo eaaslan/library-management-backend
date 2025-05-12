@@ -8,15 +8,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tr.com.eaaslan.library.exception.BusinessRuleException;
 import tr.com.eaaslan.library.exception.ResourceAlreadyExistException;
 import tr.com.eaaslan.library.exception.ResourceNotFoundException;
 import tr.com.eaaslan.library.model.Book;
+import tr.com.eaaslan.library.model.Borrowing;
+import tr.com.eaaslan.library.model.BorrowingStatus;
 import tr.com.eaaslan.library.model.Genre;
 import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
 import tr.com.eaaslan.library.model.dto.Book.BookResponse;
 import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
 import tr.com.eaaslan.library.model.mapper.BookMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
+import tr.com.eaaslan.library.repository.BorrowingRepository;
 
 import java.util.List;
 
@@ -27,10 +31,12 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final BorrowingRepository borrowingRepository;
 
-    public BookServiceImpl(BookRepository bookRepository, BookMapper bookMapper) {
+    public BookServiceImpl(BookRepository bookRepository, BookMapper bookMapper, BorrowingRepository borrowingRepository) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
+        this.borrowingRepository = borrowingRepository;
     }
 
     @Override
@@ -84,7 +90,18 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public BookResponse deleteBook(Long id) {
-        Book book = bookRepository.getBooksById(id).orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
+
+        // Check if there are any active borrowings for this book
+        List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndStatus(id, BorrowingStatus.ACTIVE);
+
+        if (!activeBorrowings.isEmpty()) {
+            throw new BusinessRuleException("Cannot delete book: Book is currently borrowed by " +
+                    activeBorrowings.size() + " user(s). Book ID: " + id);
+        }
+
+        borrowingRepository.deleteByBookId(id);
         log.info("Deleting book with ID: {}", id);
         bookRepository.delete(book);
         return bookMapper.toResponse(book);
