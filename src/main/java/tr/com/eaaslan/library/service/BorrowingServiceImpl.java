@@ -29,13 +29,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-
 public class BorrowingServiceImpl implements BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BorrowingMapper borrowingMapper;
+    private final BookAvailabilityEventService eventService;
 
     private static final Logger log = LoggerFactory.getLogger(BorrowingServiceImpl.class);
 
@@ -106,7 +106,10 @@ public class BorrowingServiceImpl implements BorrowingService {
         if (book.getQuantity() <= 0) {
             book.setAvailable(false);
         }
+
         bookRepository.save(book);
+
+        eventService.publishBookAvailabilityChange(book);
 
         return borrowingMapper.toResponse(borrowing);
     }
@@ -146,6 +149,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         Book book = borrowing.getBook();
         book.setQuantity(book.getQuantity() + 1);
         book.setAvailable(true);
+
+        eventService.publishBookAvailabilityChange(book);
         bookRepository.save(book);
 
         Borrowing updatedBorrowing = borrowingRepository.save(borrowing);
