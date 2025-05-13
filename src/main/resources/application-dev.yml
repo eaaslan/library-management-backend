@@ -1,45 +1,37 @@
 spring:
   jwt:
     secret: 4261656C64756E6732303235536563726574546F6B656E4B6579466F724C6962726172794170706C69636174696F6E
-    expiration-ms: 86400000  # 24 hours
+    expiration-ms: 86400000
   datasource:
-    url: jdbc:postgresql://localhost:5432/library_db
+    url: jdbc:postgresql://localhost:5432/library_db?currentSchema=public
     username: postgres
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        default_schema: public
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-# application-dev.yml - Development ortamında Actuator ayarları
-
-# Development'da daha fazla endpoint açık olabilir, debug'a yardımcı olur
 management:
   endpoints:
     web:
       exposure:
-        # Dev'de daha fazla endpoint açık - debugging için faydalı
         include: health,metrics,info,env,configprops,loggers,beans,threaddump,heapdump
-
   endpoint:
     health:
-      # Dev'de detayları göstermek istiyoruz
       show-details: always
       show-components: always
-
-  # Dev'de daha ayrıntılı health check'ler
   health:
     db:
       enabled: true
     diskspace:
       enabled: true
 
-# Dev ortamı için ek bilgiler
 info:
   environment: development
   debug: true
   database-url: ${spring.datasource.url}
-  # Dev'de hassas olmayan bilgileri gösterebiliriz

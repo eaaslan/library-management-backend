@@ -33,8 +33,8 @@ public class UserController {
     )
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
-        UserResponse createdUser = userService.createPatronUser(userCreateRequest);
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest, @RequestParam String role) {
+        UserResponse createdUser = userService.createPatronUserWithStatus(userCreateRequest, role);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
@@ -105,7 +105,7 @@ public class UserController {
             description = "Soft deletes user with the provided id"
     )
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<UserResponse> softDeleteUser(@PathVariable Long id, Principal principal) {
         return ResponseEntity.ok(userService.deleteUser(id, principal.getName()));
     }

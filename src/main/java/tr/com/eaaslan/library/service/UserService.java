@@ -14,6 +14,8 @@ public interface UserService {
 
     UserResponse createPatronUser(UserCreateRequest userCreateRequest);
 
+    public UserResponse createPatronUserWithStatus(UserCreateRequest userCreateRequest, String userRole);
+
     Page<UserResponse> getAllUsersIncludingDeleted(int page, int size, String sortBy);
 
     Page<UserResponse> getAllActiveUsers(int page, int size, String sortBy);

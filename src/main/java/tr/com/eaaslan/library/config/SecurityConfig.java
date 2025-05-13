@@ -61,8 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
 
                         .requestMatchers("/api/v1/books/availability/**").authenticated()
-                        
-                        .anyRequest().authenticated()  // permitAll() yerine authenticated() kullanın!
+
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

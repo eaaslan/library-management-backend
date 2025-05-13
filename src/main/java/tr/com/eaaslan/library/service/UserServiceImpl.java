@@ -83,6 +83,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public UserResponse createPatronUserWithStatus(UserCreateRequest userCreateRequest, String userRole) {
+
+        if (userRepository.existsByEmail(userCreateRequest.email())) {
+            throw new ResourceAlreadyExistException("User", "email", userCreateRequest.email());
+        }
+
+        if (userRepository.existsByPhoneNumber(userCreateRequest.phoneNumber())) {
+            throw new ResourceAlreadyExistException("User", "phone number", userCreateRequest.phoneNumber());
+        }
+        User user = userMapper.toEntity(userCreateRequest);
+
+        user.setRole(UserRole.valueOf(userRole.toUpperCase()));
+        user.setStatus(UserStatus.ACTIVE);
+
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
@@ -198,7 +220,7 @@ public class UserServiceImpl implements UserService {
         List<Borrowing> allBorrowings = borrowingRepository.findByUserId(user.getId(), Pageable.unpaged()).getContent();
 
         if (!allBorrowings.isEmpty()) {
-            // First handle book quantities for non-returned borrowings
+        
             for (Borrowing borrowing : allBorrowings) {
                 if (borrowing.getStatus() != BorrowingStatus.RETURNED) {
                     Book book = borrowing.getBook();
@@ -209,7 +231,7 @@ public class UserServiceImpl implements UserService {
                     bookRepository.save(book);
                 }
             }
-            
+
             borrowingRepository.deleteAll(allBorrowings);
         }
 

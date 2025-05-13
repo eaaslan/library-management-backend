@@ -73,6 +73,12 @@ public class JwtTokenGenerator {
             log.info(patron3);
             log.info("==================================================\n");
 
+            // Generate pre-patron token
+            String patron4 = generatePermanentToken(key, "patron4@library.com", "ROLE_PATRON");
+            log.info("\nPERMANENT patron4@library.com TOKEN FOR TESTING:");
+            log.info(patron4);
+            log.info("==================================================\n");
+
 
         };
     }

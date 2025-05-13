@@ -31,11 +31,5 @@ public interface BorrowingMapper {
     default String statusToString(BorrowingStatus status) {
         return status != null ? status.name() : null;
     }
-
-//    @Named("isCurrentlyOverdue")
-//    default boolean isCurrentlyOverdue(LocalDate dueDate, BorrowingStatus status) {
-//        return status == BorrowingStatus.ACTIVE &&
-//                dueDate != null &&
-//                dueDate.isBefore(LocalDate.now());
-//    }
+    
 }

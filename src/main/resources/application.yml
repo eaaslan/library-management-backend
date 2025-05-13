@@ -3,22 +3,21 @@ spring:
     active: dev
 
 management:
-  # Endpoint'lerin temel yolu
+
   endpoints:
     web:
       base-path: /actuator
-      # Temel endpoint'ler - tüm ortamlarda gerekli olanlar
+
       exposure:
         include: health,info
 
-  # Health endpoint'i temel yapılandırması
   endpoint:
     health:
-      # Bu ayar profile'lara göre değişebilir
+
       show-details: never
       show-components: never
 
-  # Info endpoint'i yapılandırması
+
   info:
     env:
       enabled: true
@@ -27,7 +26,6 @@ management:
     os:
       enabled: true
 
-# Uygulama bilgileri - tüm ortamlarda aynı
 info:
   app:
     name: Library Management System
@@ -35,7 +33,6 @@ info:
     version: 1.0.0
     developer: eaaslan
 
-# PDF Export Configuration
 app:
   library:
     name: ${LIBRARY_NAME:Library Management System}
@@ -45,14 +42,12 @@ app:
 
   pdf:
     export:
-      # Maximum records per export (security measure)
+
       max-records: ${PDF_MAX_RECORDS:10000}
 
-      # Cache settings for frequent exports
       cache-enabled: ${PDF_CACHE_ENABLED:true}
       cache-duration: ${PDF_CACHE_DURATION:PT10M}
 
-      # Async processing settings
       async-enabled: ${PDF_ASYNC_ENABLED:false}
       thread-pool-size: ${PDF_THREAD_POOL_SIZE:2}
 

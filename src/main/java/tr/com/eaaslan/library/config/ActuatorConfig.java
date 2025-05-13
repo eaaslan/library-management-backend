@@ -51,10 +51,9 @@ public class ActuatorConfig {
     public HealthIndicator databaseHealthIndicator() {
         return () -> {
             try {
-                // Basic connectivity check
+
                 Integer connectivityResult = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
 
-                // Check if main tables are accessible
                 long userCount = userRepository.count();
                 long bookCount = bookRepository.count();
                 long borrowingCount = borrowingRepository.count();
@@ -139,7 +138,7 @@ public class ActuatorConfig {
     public HealthIndicator libraryBusinessHealthIndicator() {
         return () -> {
             try {
-                // Check if we have at least some data in the system
+
                 long userCount = userRepository.count();
                 long bookCount = bookRepository.count();
 
@@ -149,7 +148,7 @@ public class ActuatorConfig {
                             .withDetail("recommendation", "Add books to the library system")
                             .build();
                 }
-                
+
                 boolean hasAdmin = userRepository.findAll().stream()
                         .anyMatch(user -> user.getRole().name().equals("ADMIN"));
 

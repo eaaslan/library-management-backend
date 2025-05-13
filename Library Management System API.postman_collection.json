@@ -1,0 +1,3071 @@
+{
+	"info": {
+		"_postman_id": "e853465a-30e5-4bea-a9d6-2c713d9ffcf4",
+		"name": "Library Management System API",
+		"description": "Complete API test collection for Getir Java Spring Boot Bootcamp - Library Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18350373"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@library.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Librarian",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"librarian@library.com\",\n  \"password\": \"librarian123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Patron",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patron@library.com\",\n  \"password\": \"patron123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register New User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"05501234569\",\n  \"address\": \"Test Address\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Create User (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"phoneNumber\": \"05501234568\",\n  \"address\": \"Test Address\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users?role=PATRON",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "PATRON"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Librarian (Admin/Librarian)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newlibrarian@library.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"New\",\n  \"lastName\": \"Librarian\",\n  \"phoneNumber\": \"05501234569\",\n  \"address\": \"Library Address\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/librarians",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"librarians"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Non-Deleted Users (Admin/Librarian)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=0&size=10&sortBy=id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Active Users By Role (Admin/Librarian)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/role/:role/active?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"role",
+								":role",
+								"active"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "patron",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "role",
+									"value": "patron"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get All Active Admin (Admin/Librarian)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer "
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/api/v1/users/role/:role/active?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"role",
+										":role",
+										"active"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										},
+										{
+											"key": "role",
+											"value": "patron",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "role",
+											"value": "admin"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": "",
+							"header": [],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": ""
+						},
+						{
+							"name": "Get All Active Librarian(Admin/Librarian)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{librarianToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/role/:role/active?page=0&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"role",
+										":role",
+										"active"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										},
+										{
+											"key": "role",
+											"value": "patron",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "role",
+											"value": "librarian"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": "",
+							"header": [],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "User Display Own User Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{patronToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{patronId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{patronId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users Including Deleted (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"phoneNumber\": \"05509876543\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{patronId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{patronId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Status (Admin/Librarian)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{pendingPatronId}}/status/ACTIVE",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{pendingPatronId}}",
+								"status",
+								"ACTIVE"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Make user status Active",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{adminToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{pendingPatronId}}/status/:status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{pendingPatronId}}",
+										"status",
+										":status"
+									],
+									"variable": [
+										{
+											"key": "status",
+											"value": "active"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Make user status pending",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{adminToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{pendingPatronId}}/status/:status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{pendingPatronId}}",
+										"status",
+										":status"
+									],
+									"variable": [
+										{
+											"key": "status",
+											"value": "pending"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Soft Delete User (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    const requiredFields = [\"id\", \"email\", \"firstName\", \"lastName\", \"phoneNumber\", \"role\", \"status\", \"maxAllowedBorrows\", \"createdAt\", \"createdBy\", \"deleted\"];\r",
+									"    requiredFields.forEach(field => {\r",
+									"        pm.expect(responseData).to.have.property(field);\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{secondPatronId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{secondPatronId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hard Delete User (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/permanent/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"permanent",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Users by Name",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/search?name=User&page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "User"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users by Role",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/role/:role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"role",
+								":role"
+							],
+							"variable": [
+								{
+									"key": "role",
+									"value": "patron"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Book Management",
+			"item": [
+				{
+					"name": "Create Book (Admin/Librarian)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{librarianToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isbn\": \"9780132350884\",\n  \"title\": \"Clean Code\",\n  \"author\": \"Robert C. Martin\",\n  \"publicationYear\": 2008,\n  \"publisher\": \"Prentice Hall\",\n  \"genre\": \"SCIENCE\",\n  \"imageUrl\": \"http://example.com/cover.jpg\",\n  \"description\": \"A handbook of agile software craftsmanship\",\n  \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books?page=0&size=10&sortBy=title",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "title"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Avaliable Books Concurrently",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{librarianToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/books/availability/stream",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"books",
+								"availability",
+								"stream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ISBN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/isbn/9780132350884",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"isbn",
+								"9780132350884"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book (Admin/Librarian)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Clean Code: Updated\",\n  \"description\": \"Updated description\",\n  \"quantity\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book (Admin/Librarian)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Books by Title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/search/title/:title",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"search",
+								"title",
+								":title"
+							],
+							"variable": [
+								{
+									"key": "title",
+									"value": "the"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Books by Author",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/search/author/:author",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"search",
+								"author",
+								":author"
+							],
+							"variable": [
+								{
+									"key": "author",
+									"value": "martin"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Books by Genre",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/search/genre/:genre",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"search",
+								"genre",
+								":genre"
+							],
+							"variable": [
+								{
+									"key": "genre",
+									"value": "science"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/available",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"available"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Borrowing Management",
+			"item": [
+				{
+					"name": "Patron Borrow Book",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{thirdPatronToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patron Borrow Book When Have 3 Unreturned Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": 1,\n  \"dueDate\": \"2024-02-15\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patron Borrow Book That No Available",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": 1,\n  \"dueDate\": \"2024-02-15\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return Book (Patron)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"returnDate\": \"2024-01-20\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/1/return",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"1",
+								"return"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Return Book That Was Not Borrowed By This Patron",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{patronToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"returnDate\": \"2024-01-20\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings/1/return",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings",
+										"1",
+										"return"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Return Book That Already Borrowed",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{patronToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"returnDate\": \"2024-01-20\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings/1/return",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings",
+										"1",
+										"return"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Get All Borrowings (Admin/Librarian)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings?page=0&size=10&sortBy=borrowDate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "borrowDate"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Borrowings (Admin/Librarian) Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							},
+							{
+								"key": "Accept",
+								"value": "event",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/books/availability/stream",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"books",
+								"availability",
+								"stream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Borrowings (Patron)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/my-borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"my-borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Borrowings by User ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/user/{{patronId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"user",
+								"{{patronId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Borrowings by Book ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/book/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"book",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Overdue Borrowings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{librarianToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/overdue",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"overdue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Borrowing by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/borrowings/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Security Tests",
+			"item": [
+				{
+					"name": "Patron Cannot Create Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isbn\": \"9780132350885\",\n  \"title\": \"Test Book\",\n  \"author\": \"Test Author\",\n  \"publicationYear\": 2023,\n  \"publisher\": \"Test Publisher\",\n  \"genre\": \"SCIENCE\",\n  \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Suspended User Cannot Borrow Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{suspended@library.com}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patron Cannot Access All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{patron2Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patron Cannot Create Librarian",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"unauthorizedlibrarian@library.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Unauthorized\",\n  \"lastName\": \"Librarian\",\n  \"phoneNumber\": \"05501234571\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/librarians",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"librarians"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patron Cannot Access Admin Tests",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patronToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/testing/run-penalty-check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"testing",
+								"run-penalty-check"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Monitoring",
+			"item": [
+				{
+					"name": "Health Check Public Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Info Public Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/info",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Jvm Memory Used (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/metrics/jvm.memory.used",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"metrics",
+								"jvm.memory.used"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Application Ready Time (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/metrics/application.ready.time",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"metrics",
+								"application.ready.time"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Environments(Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/env",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"env"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Metrics (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/metrics",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"metrics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Config Props (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/configprops",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"configprops"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Loggers (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/loggers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"loggers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Beans (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/beans",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"beans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thread Dump (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/threaddump",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"threaddump"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Head Dump (Only Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/actuator/heapdump",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"heapdump"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Export Service (Admin Only)",
+			"item": [
+				{
+					"name": "Get all borrowings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/export/borrowings/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"export",
+								"borrowings",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book borrowings by book Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/export/borrowings/book/:bookId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"export",
+								"borrowings",
+								"book",
+								":bookId"
+							],
+							"variable": [
+								{
+									"key": "bookId",
+									"value": "11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Overdues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/export/borrowings/overdue",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"export",
+								"borrowings",
+								"overdue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Borrowings by User Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/export/borrowings/user/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"export",
+								"borrowings",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Borrowings by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/export/borrowings/date-range?startDate=2025-02-12&endDate=2025-05-13",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"export",
+								"borrowings",
+								"date-range"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-02-12"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-05-13"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{adminToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Scenarios",
+			"item": [
+				{
+					"name": "User Journey",
+					"item": [
+						{
+							"name": "1. Register New User (PATRON)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User registered successfully\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"pm.test(\"User status is PENDING\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.eql(\"PENDING\");",
+											"    pm.environment.set(\"newUserId\", jsonData.id);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newpatron@library.com\",\n  \"password\": \"patron123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"05501294567\",\n  \"address\": \"Test Address\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2. Get Books (for book ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Books retrieved successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"if (jsonData.length > 0) {",
+											"    pm.environment.set(\"bookId\", jsonData[0].id);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/books?page=0&size=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"books"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3. Login New User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Login successful\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"userToken\", jsonData.token);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newpatron@library.com\",\n  \"password\": \"patron123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "4. Try to Borrow Book (Should Fail - PENDING User)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Borrowing failed due to PENDING status\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"pm.test(\"Error message contains status info\", function () {",
+											"    var responseText = pm.response.text();",
+											"    pm.expect(responseText).to.include(\"PENDING\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{newPatronToken\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{userToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"bookId\":20\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "5. Login as Librarian",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Librarian login successful\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"librarianToken\", jsonData.token);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"librarian@library.com\",\n  \"password\": \"librarian123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "6. Librarian Updates User Status to ACTIVE",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User status updated successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"User status is now ACTIVE\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.eql(\"ACTIVE\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{librarianToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{newUserId}}/status/active",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{newUserId}}",
+										"status",
+										"active"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "7. Login User Again (ACTIVE Status)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Login successful for active user\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"activeUserToken\", jsonData.token);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newpatron@library.com\",\n  \"password\": \"patron123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "8. Borrow Book (Now Should Succeed)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Book borrowed successfully\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"borrowingId\", jsonData.id);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{newPatronToken\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{activeUserToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"bookId\": 20\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "9. Get User Profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User profile retrieved successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"User status is ACTIVE\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.eql(\"ACTIVE\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{newPatronToken\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{activeUserToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/{{newUserId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"{{newUserId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "10. Get My Borrowings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Borrowings retrieved successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"User has at least one borrowing\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{newPatronToken\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{activeUserToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/borrowings/my-borrowings?page=0&size=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings",
+										"my-borrowings"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Check book quantity concurrently",
+					"item": [
+						{
+							"name": "1. Get Avaliable Books Concurrently Copy",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{librarianToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/v1/books/availability/stream",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"books",
+										"availability",
+										"stream"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2.  First Patron Borrow Book",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{thirdPatronToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{patronToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"bookId\": 2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3. Second Patron Borrow Second Book",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{patron4Token\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{patronToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"bookId\": 2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "4. Patron Return  Book",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{patron4Token\n}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{patronToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"returnDate\": \"2025-05-20\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/borrowings/41/return",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"borrowings",
+										"41",
+										"return"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Borrowings by Date Range Copy",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/export/borrowings/date-range?startDate=2025-05-13&endDate=2025-05-14",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"export",
+										"borrowings",
+										"date-range"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2025-05-13"
+										},
+										{
+											"key": "endDate",
+											"value": "2025-05-14"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Borrowings by Date Range Copy",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/export/borrowings/date-range?startDate=2025-05-13&endDate=2025-05-14",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"export",
+										"borrowings",
+										"date-range"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2025-05-13"
+										},
+										{
+											"key": "endDate",
+											"value": "2025-05-14"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "User tried to borrow the book that has 0 quantity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{thirdPatronToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bookId\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User tried to borrow a book when have already 3 active borrowing Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{patronToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bookId\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Suspended User Cannot Borrow Book Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{suspended@library.com}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/borrowings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"borrowings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1"
+		},
+		{
+			"key": "adminToken",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsImVtYWlsIjoiYWRtaW5AbGlicmFyeS5jb20iLCJzdWIiOiJhZG1pbkBsaWJyYXJ5LmNvbSIsImlhdCI6MTc0NjYzNDA5NywiZXhwIjoyMDYxOTk0MDk3fQ.WRXqlRwb2rP1-_0est9Nweg_QIxXECV1U-Jng31Qun5j28LokfooTjIa6J26sxrDs9BJf_S8Mx9mvxuix7RENQ"
+		},
+		{
+			"key": "librarianToken",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9MSUJSQVJJQU4iLCJlbWFpbCI6ImxpYnJhcmlhbkBsaWJyYXJ5LmNvbSIsInN1YiI6ImxpYnJhcmlhbkBsaWJyYXJ5LmNvbSIsImlhdCI6MTc0NjYzNDA5NywiZXhwIjoyMDYxOTk0MDk3fQ.LRntrTEN1F2zF2DL03NSU2-79iUUaBFeIY55yZOcJUCesLENUT-JZNHcAO5A_T8wkgX7nlQgx3V2hBv6yoMUJg"
+		},
+		{
+			"key": "patronToken",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBhdHJvbkBsaWJyYXJ5LmNvbSIsInN1YiI6InBhdHJvbkBsaWJyYXJ5LmNvbSIsImlhdCI6MTc0Njg3MjMwNywiZXhwIjoyMDYyMjMyMzA3fQ.JWHvXJhFNDEygjdiqS53jmZY_2MG1Oi6D-PPe5wBHDUWS-yQIDCHmihH8NEK2CWkuKmhvd7HNjO2kqzM1k9KnQ"
+		},
+		{
+			"key": "pendingPatronToken",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBlbmRpbmdQYXRyb25AbGlicmFyeS5jb20iLCJzdWIiOiJwZW5kaW5nUGF0cm9uQGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ2ODczNjA5LCJleHAiOjIwNjIyMzM2MDl9.EDiYiqU4faCzR0JAHxh1uc_kXUbni-1od38oxfF2Ug9nj2EQpqMktEqjNeV0M6Bmq0ZUed4quGOyc6jSMB2Iew"
+		},
+		{
+			"key": "patron2Token",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBhdHJvbjJAbGlicmFyeS5jb20iLCJzdWIiOiJwYXRyb24yQGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ2OTAyMDA0LCJleHAiOjIwNjIyNjIwMDR9.oXCz8fn_GXSbxAZsuCReSkF0Ezc7W706xRWwHi0DKQRPUDCxOkA76GzH1lmvNrjbpaNaQ4Kfws72-8XgaGTFdw"
+		},
+		{
+			"key": "patron3Token",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBhdHJvbjNAbGlicmFyeS5jb20iLCJzdWIiOiJwYXRyb24zQGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ2OTAyMDA0LCJleHAiOjIwNjIyNjIwMDR9.pQQvc3OrRlBfXszc_iexQ2Rb_ivOVBNWqwJ4-gy5beDO2RyQ0OrGrtZSDsargmCkqAqZ4yLGG8RmQw-Vajm_BA"
+		},
+		{
+			"key": "deleted@library.com",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6ImRlbGV0ZWRAbGlicmFyeS5jb20iLCJzdWIiOiJkZWxldGVkQGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ2OTk3ODE5LCJleHAiOjIwNjIzNTc4MTl9.q9YG_vxHFqhPVSwAtomhAM3ztvxU7fvv4UbuUpquTtaJGpNkgT_Af7IQRDsI3ffV7sWTfhmluPPgrmDmWgDcBQ"
+		},
+		{
+			"key": "suspended@library.com",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InN1c3BlbmRlZEBsaWJyYXJ5LmNvbSIsInN1YiI6InN1c3BlbmRlZEBsaWJyYXJ5LmNvbSIsImlhdCI6MTc0Njk5NzgxOSwiZXhwIjoyMDYyMzU3ODE5fQ.Zq8vlMLZN_U5VZA-CT2t8ceKdJ7_he-wke9UhVyaGsFstBgqmII88KoksD-uAqSFxNZ6rTHQecdif9mzJxRAMg"
+		},
+		{
+			"key": "patronId",
+			"value": "3"
+		},
+		{
+			"key": "adminId\n",
+			"value": "1"
+		},
+		{
+			"value": "",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "librarianId\n",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "pendingPatronId",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "secondPatronId",
+			"value": "4",
+			"type": "string"
+		},
+		{
+			"key": "deletedPatronId",
+			"value": "7",
+			"type": "string"
+		},
+		{
+			"key": "suspendedPatronId",
+			"value": "6",
+			"type": "string"
+		},
+		{
+			"key": "newPatronToken\n",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6Im5ld3BhdHJvbkBsaWJyYXJ5LmNvbSIsInN1YiI6Im5ld3BhdHJvbkBsaWJyYXJ5LmNvbSIsImlhdCI6MTc0NzE2NDAwMSwiZXhwIjoyMDYyNTI0MDAxfQ.bZZgGiGTuLnOAsZF1XEHFR3QP50febQWDSyQ2yKwqWTQZA1wmQAcZAsy_D1JdY9sW7p9hbnermp9eJr8abVPXQ",
+			"type": "string"
+		},
+		{
+			"key": "newPatronId",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "newUserId",
+			"value": "10",
+			"type": "default"
+		},
+		{
+			"key": "thirdPatronToken",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBhdHJvbjNAbGlicmFyeS5jb20iLCJzdWIiOiJwYXRyb24zQGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ3MTY1MjU1LCJleHAiOjIwNjI1MjUyNTV9.wsA1x5Ox97zVg798nx49zAfcB7tc74WuacXJXUOGb6_aAE0wIIz3aayvGrPG-3skPWfVCPHN6_9-xoU6jZiT7A",
+			"type": "string"
+		},
+		{
+			"key": "thirdPatronId",
+			"value": "8",
+			"type": "string"
+		},
+		{
+			"key": "patron4Token\n",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9QQVRST04iLCJlbWFpbCI6InBhdHJvbjRAbGlicmFyeS5jb20iLCJzdWIiOiJwYXRyb240QGxpYnJhcnkuY29tIiwiaWF0IjoxNzQ3MTcxMjc4LCJleHAiOjIwNjI1MzEyNzh9.l4eYMPM65CGxPZeyfswZM2oiraEnm79Oxiv8wX-o4rFU5dEVZr3KLd62dMeLT28m121q99_9686dlJGC2lkBwQ",
+			"type": "string"
+		},
+		{
+			"key": "fourthPatronId\n",
+			"value": "9",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlDocker",
+			"value": "http://localhost:8081/api/v1",
+			"type": "string"
+		}
+	]
+}
