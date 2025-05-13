@@ -7,3 +7,33 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+# application-prod.yml - Production ortamında Actuator ayarları
+
+# Production'da güvenlik odaklı yaklaşım - sadece gerekli olanlar açık
+management:
+  endpoints:
+    web:
+      exposure:
+        # Prod'da minimal endpoint'ler - güvenlik odaklı
+        include: health,metrics,info
+
+  endpoint:
+    health:
+      # Prod'da detayları sadece yetkili kullanıcılara gösteriyoruz
+      show-details: when-authorized
+      show-components: when-authorized
+
+  # Production'da sadece kritik health check'ler
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+
+# Production için güvenli bilgiler - hassas bilgiler yok
+info:
+  environment: production
+  build:
+    time: '@maven.build.timestamp@'
+    version: '@project.version@'
+  # Prod'da database URL'si gibi hassas bilgileri göstermiyoruz

@@ -13,3 +13,33 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+# application-dev.yml - Development ortamında Actuator ayarları
+
+# Development'da daha fazla endpoint açık olabilir, debug'a yardımcı olur
+management:
+  endpoints:
+    web:
+      exposure:
+        # Dev'de daha fazla endpoint açık - debugging için faydalı
+        include: health,metrics,info,env,configprops,loggers,beans,threaddump,heapdump
+
+  endpoint:
+    health:
+      # Dev'de detayları göstermek istiyoruz
+      show-details: always
+      show-components: always
+
+  # Dev'de daha ayrıntılı health check'ler
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+
+# Dev ortamı için ek bilgiler
+info:
+  environment: development
+  debug: true
+  database-url: ${spring.datasource.url}
+  # Dev'de hassas olmayan bilgileri gösterebiliriz

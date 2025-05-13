@@ -10,3 +10,34 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+
+        include: health,metrics,info,env
+
+  endpoint:
+    health:
+
+      show-details: always
+      show-components: always
+
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+
+  server:
+    port: 8081
+
+info:
+  environment: docker
+  container:
+    name: library-management-system
+    version: latest
+  infrastructure:
+    orchestrator: docker-compose
