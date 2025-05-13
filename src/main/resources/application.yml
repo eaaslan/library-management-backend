@@ -34,3 +34,29 @@ info:
     description: Patika.dev & Getir Java Spring Boot Bootcamp - Final Project
     version: 1.0.0
     developer: eaaslan
+
+# PDF Export Configuration
+app:
+  library:
+    name: ${LIBRARY_NAME:Library Management System}
+
+  company:
+    name: ${COMPANY_NAME:GETIR Java Spring Boot Bootcamp}
+
+  pdf:
+    export:
+      # Maximum records per export (security measure)
+      max-records: ${PDF_MAX_RECORDS:10000}
+
+      # Cache settings for frequent exports
+      cache-enabled: ${PDF_CACHE_ENABLED:true}
+      cache-duration: ${PDF_CACHE_DURATION:PT10M}
+
+      # Async processing settings
+      async-enabled: ${PDF_ASYNC_ENABLED:false}
+      thread-pool-size: ${PDF_THREAD_POOL_SIZE:2}
+
+logging:
+  level:
+    tr.com.eaaslan.library.service.BorrowingPdfExportService: DEBUG
+    tr.com.eaaslan.library.controller.BorrowingPdfExportController: DEBUG

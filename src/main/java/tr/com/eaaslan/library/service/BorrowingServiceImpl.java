@@ -236,4 +236,90 @@ public class BorrowingServiceImpl implements BorrowingService {
             log.info("Updated status for {} overdue borrowings", overdueBorrowings.size());
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getAllBorrowingsForExport() {
+        log.info("Fetching all borrowing records for export");
+
+        // Newest first order
+        Sort sort = Sort.by(Sort.Direction.DESC, "borrowDate", "id");
+        List<Borrowing> borrowings = borrowingRepository.findAll(sort);
+
+        log.info("Retrieved {} borrowing records for export", borrowings.size());
+
+        return borrowings.stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getBorrowingsByUserForExport(Long userId) {
+        log.info("Fetching borrowing records for user {} for export", userId);
+
+        List<Borrowing> borrowings = borrowingRepository.findByUserIdOrderByBorrowDateDesc(userId);
+
+        log.info("Retrieved {} borrowing records for user {} for export", borrowings.size(), userId);
+
+        return borrowings.stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getOverdueBorrowingsForExport() {
+        log.info("Fetching overdue borrowing records for export");
+
+        List<Borrowing> overdueBorrowings = borrowingRepository.findByStatusOrderByDueDateAsc(BorrowingStatus.OVERDUE);
+
+        log.info("Retrieved {} overdue borrowing records for export", overdueBorrowings.size());
+
+        return overdueBorrowings.stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getBorrowingsByDateRangeForExport(LocalDate startDate, LocalDate endDate) {
+        log.info("Fetching borrowing records by date range for export: {} to {}", startDate, endDate);
+
+        List<Borrowing> borrowings;
+
+        if (startDate == null && endDate == null) {
+            // Tüm kayıtları getir
+            borrowings = borrowingRepository.findAll(Sort.by(Sort.Direction.DESC, "borrowDate"));
+        } else if (startDate == null) {
+            // Sadece end date var
+            borrowings = borrowingRepository.findByBorrowDateLessThanEqualOrderByBorrowDateDesc(endDate);
+        } else if (endDate == null) {
+            // Sadece start date var
+            borrowings = borrowingRepository.findByBorrowDateGreaterThanEqualOrderByBorrowDateDesc(startDate);
+        } else {
+            // Her iki tarih de var
+            borrowings = borrowingRepository.findByBorrowDateBetweenOrderByBorrowDateDesc(startDate, endDate);
+        }
+
+        log.info("Retrieved {} borrowing records for date range export", borrowings.size());
+
+        return borrowings.stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowingResponse> getBorrowingsByBookForExport(Long bookId) {
+        log.info("Fetching borrowing history for book {} for export", bookId);
+
+        List<Borrowing> borrowings = borrowingRepository.findByBookIdOrderByBorrowDateDesc(bookId);
+
+        log.info("Retrieved {} borrowing records for book {} for export", borrowings.size(), bookId);
+
+        return borrowings.stream()
+                .map(borrowingMapper::toResponse)
+                .toList();
+    }
 }

@@ -52,4 +52,20 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     @Query("SELECT MAX(b.borrowDate) FROM Borrowing b WHERE b.user.id = :userId")
     LocalDate findLatestActivityDateByUserId(@Param("userId") Long userId);
+
+    List<Borrowing> findByUserIdOrderByBorrowDateDesc(Long userId);
+
+    List<Borrowing> findByStatusOrderByDueDateAsc(BorrowingStatus status);
+
+    List<Borrowing> findByBookIdOrderByBorrowDateDesc(Long bookId);
+
+    @Query("SELECT b FROM Borrowing b WHERE b.borrowDate >= :startDate ORDER BY b.borrowDate DESC")
+    List<Borrowing> findByBorrowDateGreaterThanEqualOrderByBorrowDateDesc(@Param("startDate") LocalDate startDate);
+
+    @Query("SELECT b FROM Borrowing b WHERE b.borrowDate <= :endDate ORDER BY b.borrowDate DESC")
+    List<Borrowing> findByBorrowDateLessThanEqualOrderByBorrowDateDesc(@Param("endDate") LocalDate endDate);
+
+    @Query("SELECT b FROM Borrowing b WHERE b.borrowDate BETWEEN :startDate AND :endDate ORDER BY b.borrowDate DESC")
+    List<Borrowing> findByBorrowDateBetweenOrderByBorrowDateDesc(@Param("startDate") LocalDate startDate,
+                                                                 @Param("endDate") LocalDate endDate);
 }

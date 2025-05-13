@@ -5,6 +5,9 @@ import tr.com.eaaslan.library.model.dto.borrowing.BorrowingCreateRequest;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingReturnRequest;
 
+import java.time.LocalDate;
+import java.util.List;
+
 public interface BorrowingService {
 
     BorrowingResponse borrowBook(BorrowingCreateRequest borrowingCreateRequest, String currentUserEmail);
@@ -22,4 +25,14 @@ public interface BorrowingService {
     Page<BorrowingResponse> getOverdueBorrowings(int page, int size);
 
     BorrowingResponse getBorrowingById(Long id);
+
+    List<BorrowingResponse> getAllBorrowingsForExport();
+
+    List<BorrowingResponse> getBorrowingsByUserForExport(Long userId);
+
+    List<BorrowingResponse> getOverdueBorrowingsForExport();
+
+    List<BorrowingResponse> getBorrowingsByDateRangeForExport(LocalDate startDate, LocalDate endDate);
+
+    List<BorrowingResponse> getBorrowingsByBookForExport(Long bookId);
 }
