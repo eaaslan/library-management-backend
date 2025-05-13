@@ -88,7 +88,7 @@ public class ActuatorConfig {
     @Bean
     public InfoContributor libraryInfoContributor() {
         return builder -> {
-            // Application details
+
             builder.withDetail("application", Map.of(
                     "name", "Library Management System",
                     "description", "Spring Boot Library Management API with Book Borrowing System",
@@ -96,7 +96,6 @@ public class ActuatorConfig {
                     "developer", "eaaslan"
             ));
 
-            // Project information
             builder.withDetail("project", Map.of(
                     "bootcamp", "Patika.dev & Getir Java Spring Boot Bootcamp",
                     "type", "Final Project (Bitirme Projesi)",
@@ -144,15 +143,13 @@ public class ActuatorConfig {
                 long userCount = userRepository.count();
                 long bookCount = bookRepository.count();
 
-                // Basic business logic check
                 if (bookCount == 0) {
                     return Health.down()
                             .withDetail("business_status", "No books available in the system")
                             .withDetail("recommendation", "Add books to the library system")
                             .build();
                 }
-
-                // Check for system admin existence
+                
                 boolean hasAdmin = userRepository.findAll().stream()
                         .anyMatch(user -> user.getRole().name().equals("ADMIN"));
 
