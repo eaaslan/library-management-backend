@@ -33,18 +33,17 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Import(TestJpaConfig.class)
 class BookRepositoryTest {
-    
+
     @Autowired
     private BookRepository bookRepository;
 
     @BeforeEach
     void setUp() {
-        // Clear the repository before each test
+
         bookRepository.deleteAll();
         List<Book> books = BookTestData.getTestBooks();
         bookRepository.saveAll(books);
     }
-
 
     @Test
     @DisplayName("Should find all books")

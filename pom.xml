@@ -89,7 +89,7 @@
             <artifactId>kernel</artifactId>
             <version>9.1.0</version>
         </dependency>
-  
+
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>layout</artifactId>
@@ -144,6 +144,7 @@
 
     <build>
         <plugins>
+            
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

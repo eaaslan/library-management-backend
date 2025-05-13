@@ -16,6 +16,7 @@ import tr.com.eaaslan.library.model.Genre;
 import tr.com.eaaslan.library.model.dto.book.BookCreateRequest;
 import tr.com.eaaslan.library.model.dto.book.BookUpdateRequest;
 import tr.com.eaaslan.library.repository.BookRepository;
+import tr.com.eaaslan.library.repository.BorrowingRepository;
 import tr.com.eaaslan.library.repository.UserRepository;
 import tr.com.eaaslan.library.service.BookService;
 
@@ -45,14 +46,16 @@ class BookControllerTest extends AbstractControllerTest {
     private BookRepository bookRepository;
 
     @Autowired
+    private BorrowingRepository borrowingRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        // Temizleme işlemleri
+        borrowingRepository.deleteAll();
         bookRepository.deleteAll();
 
-        // Test verilerini oluştur
         Book testBook = Book.builder()
                 .isbn("9780132350884")
                 .title("Clean Code")
@@ -69,10 +72,9 @@ class BookControllerTest extends AbstractControllerTest {
         bookRepository.save(testBook);
     }
 
-    // Test veri hazırlama metodları
     private BookCreateRequest createTestBookRequest() {
         return new BookCreateRequest(
-                "9781234567890", // Farklı bir ISBN kullan
+                "9781234567890",
                 "Test Driven Development",
                 "Kent Beck",
                 2002,
@@ -86,23 +88,23 @@ class BookControllerTest extends AbstractControllerTest {
 
     private BookUpdateRequest createTestBookUpdateRequest() {
         return new BookUpdateRequest(
-                null, // ISBN should not be updated
+                null,
                 "Clean Code: Updated Title",
-                null,  // No change to author
-                null,  // No change to year
-                null,  // No change to publisher
-                null,  // No change to genre
-                null,  // No change to imageUrl
+                null,
+                null,
+                null,
+                null,
+                null,
                 "Updated description for the book",
-                5,    // Update quantity
-                true  // Set availability
+                5,
+                true
         );
     }
 
     @Test
     @DisplayName("Should return all books with pagination")
     void shouldReturnAllBooksWithPagination() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books")
                         .param("page", "0")
                         .param("size", "10")
@@ -116,10 +118,9 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return book by ID")
     void shouldReturnBookById() throws Exception {
-        // Kitap ID'sini veritabanından al
+
         Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
-        // Act & Assert
         mockMvc.perform(get("/api/v1/books/" + bookId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("Clean Code")))
@@ -129,7 +130,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return 404 when book ID not found")
     void shouldReturn404WhenBookIdNotFound() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Book not found with ID: '999'"));
@@ -138,7 +139,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return book by ISBN")
     void shouldReturnBookByIsbn() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/isbn/9780132350884"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isbn", is("9780132350884")))
@@ -149,10 +150,9 @@ class BookControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("Should create a new book when authenticated as librarian")
     void shouldCreateNewBookWhenAuthenticatedAsLibrarian() throws Exception {
-        // Arrange
+
         BookCreateRequest request = createTestBookRequest();
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/books")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,24 +168,23 @@ class BookControllerTest extends AbstractControllerTest {
     @DisplayName("Should fail to create a book when not authenticated")
     @WithAnonymousUser
     void shouldFailToCreateBookWhenNotAuthenticated() throws Exception {
-        // Arrange
+
         BookCreateRequest request = createTestBookRequest();
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/books")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("Should return conflict when creating book with existing ISBN")
     void shouldReturnConflictWhenCreatingBookWithExistingIsbn() throws Exception {
-        // Arrange - Aynı ISBN ile yeni bir kitap oluştur
+
         BookCreateRequest request = new BookCreateRequest(
-                "9780132350884", // Var olan ISBN
+                "9780132350884",
                 "Clean Code (Duplicate)",
                 "Robert C. Martin",
                 2008,
@@ -196,7 +195,6 @@ class BookControllerTest extends AbstractControllerTest {
                 1
         );
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/books")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -209,11 +207,11 @@ class BookControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("Should update a book when authenticated as librarian")
     void shouldUpdateBookWhenAuthenticatedAsLibrarian() throws Exception {
-        // Arrange
+
         BookUpdateRequest request = createTestBookUpdateRequest();
         Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
-        // Act & Assert
+
         mockMvc.perform(put("/api/v1/books/" + bookId)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -228,16 +226,14 @@ class BookControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("Should delete a book when authenticated as librarian")
     void shouldDeleteBookWhenAuthenticatedAsLibrarian() throws Exception {
-        // Arrange
+
         Long bookId = bookRepository.findByIsbn("9780132350884").orElseThrow().getId();
 
-        // Act & Assert
         mockMvc.perform(delete("/api/v1/books/" + bookId)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("Clean Code")));
 
-        // Kitabın silindiğini doğrula
         mockMvc.perform(get("/api/v1/books/" + bookId))
                 .andExpect(status().isNotFound());
     }
@@ -245,7 +241,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should search books by title")
     void shouldSearchBooksByTitle() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/search/title/Clean")
                         .param("page", "0")
                         .param("size", "10"))
@@ -257,7 +253,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should search books by author")
     void shouldSearchBooksByAuthor() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/search/author/Martin")
                         .param("page", "0")
                         .param("size", "10"))
@@ -269,7 +265,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should search books by genre")
     void shouldSearchBooksByGenre() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/search/genre/SCIENCE")
                         .param("page", "0")
                         .param("size", "10"))
@@ -281,7 +277,7 @@ class BookControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should get available books")
     void shouldGetAvailableBooks() throws Exception {
-        // Act & Assert
+
         mockMvc.perform(get("/api/v1/books/available")
                         .param("page", "0")
                         .param("size", "10"))

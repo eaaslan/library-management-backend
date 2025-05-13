@@ -46,7 +46,6 @@ class BookControllerSecurityIntegrationTest extends AbstractControllerTest {
     @MockitoBean
     private BookService bookService;
 
-    // Helper methods for creating test data
 
     private BookCreateRequest createTestBookRequest() {
         return new BookCreateRequest(
@@ -108,7 +107,7 @@ class BookControllerSecurityIntegrationTest extends AbstractControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(bookService);
     }
@@ -180,7 +179,7 @@ class BookControllerSecurityIntegrationTest extends AbstractControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(bookService);
     }
@@ -212,7 +211,7 @@ class BookControllerSecurityIntegrationTest extends AbstractControllerTest {
         mockMvc.perform(delete("/api/v1/books/1")
                         .with(csrf()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(bookService);
     }

@@ -39,7 +39,7 @@ class AccountMaintenanceServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Patron with recent activity
+
         activePatronWithRecentActivity = User.builder()
 
                 .email("recent@example.com")
@@ -49,7 +49,6 @@ class AccountMaintenanceServiceTest {
 
         activePatronWithRecentActivity.setId(1L);
 
-        // Patron without recent activity
         activePatronWithoutRecentActivity = User.builder()
 
                 .email("inactive@example.com")
@@ -59,7 +58,6 @@ class AccountMaintenanceServiceTest {
 
         activePatronWithoutRecentActivity.setId(2L);
 
-        // Admin user
         adminUser = User.builder()
                 .email("admin@example.com")
                 .status(UserStatus.ACTIVE)
@@ -67,7 +65,7 @@ class AccountMaintenanceServiceTest {
                 .build();
 
         adminUser.setId(3L);
-        // Librarian user
+
         librarianUser = User.builder()
                 .email("librarian@example.com")
                 .status(UserStatus.ACTIVE)
@@ -80,7 +78,7 @@ class AccountMaintenanceServiceTest {
     @Test
     @DisplayName("Should mark inactive patron accounts as deleted")
     void shouldMarkInactivePatronAccountsAsDeleted() {
-        // Arrange
+
         when(userRepository.findAllByStatus(UserStatus.ACTIVE))
                 .thenReturn(Arrays.asList(
                         activePatronWithRecentActivity,
@@ -88,26 +86,19 @@ class AccountMaintenanceServiceTest {
                         adminUser,
                         librarianUser));
 
-        // Set up recent activity for active patron
         when(borrowingRepository.findLatestActivityDateByUserId(1L))
                 .thenReturn(LocalDate.now().minusDays(15)); // Active within last month
 
-        // Set up no recent activity for inactive patron
         when(borrowingRepository.findLatestActivityDateByUserId(2L))
                 .thenReturn(LocalDate.now().minusDays(45)); // Not active for more than a month
 
-        // Act
         accountMaintenanceService.handleInactiveAccounts();
 
-        // Assert
-        // Active patron should not be deleted
         verify(userRepository, never()).save(argThat(user -> user.getId().equals(1L) && user.isDeleted()));
 
-        // Admin and librarian should never be affected regardless of activity
         verify(userRepository, never()).save(argThat(user ->
                 (user.getId().equals(3L) || user.getId().equals(4L)) && user.isDeleted()));
 
-        // Should mark inactive patron as deleted
         verify(userRepository).saveAll(argThat(users -> {
             List<User> userList = new ArrayList<>();
             users.forEach(userList::add);

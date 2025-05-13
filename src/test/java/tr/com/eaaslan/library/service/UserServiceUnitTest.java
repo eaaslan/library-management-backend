@@ -23,7 +23,6 @@ import tr.com.eaaslan.library.repository.BorrowingRepository;
 import tr.com.eaaslan.library.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +63,7 @@ class UserServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize test data
+
         testUser = User.builder()
                 .email("test@example.com")
                 .password("encodedPassword")
@@ -166,7 +165,6 @@ class UserServiceUnitTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
 
-        // Setup default borrowing repository behavior
         when(borrowingRepository.findByUserIdAndStatus(anyLong(), any(BorrowingStatus.class), any(Pageable.class)))
                 .thenReturn(Page.empty());
     }
@@ -189,16 +187,13 @@ class UserServiceUnitTest {
         when(userRepository.save(any(User.class))).thenReturn(librarianUser);
         when(userMapper.toLibrarianResponse(any(User.class))).thenReturn(librarianCreateResponse);
 
-        // Act
         LibrarianCreateResponse response = userService.createLibrarianUser(testUserCreateRequest);
 
-        // Assert
         assertNotNull(response);
         assertEquals(librarianCreateResponse.email(), response.email());
         assertEquals(librarianCreateResponse.firstName(), response.firstName());
         assertEquals("LIBRARIAN", response.role());
 
-        // Verify
         verify(userRepository).existsByEmail(testUserCreateRequest.email());
         verify(userRepository).existsByPhoneNumber(testUserCreateRequest.phoneNumber());
         verify(userMapper).toEntity(testUserCreateRequest);
@@ -210,7 +205,7 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should create a patron user successfully")
     void shouldCreatePatronUser() {
-        // Arrange
+
         UserCreateRequest patronRequest = new UserCreateRequest(
                 "patron@example.com",
                 "password123",
@@ -260,7 +255,6 @@ class UserServiceUnitTest {
         assertEquals(patronResponse.firstName(), response.firstName());
         assertEquals("PATRON", response.role());
 
-        // Verify
         verify(userRepository).existsByEmail(patronRequest.email());
         verify(userRepository).existsByPhoneNumber(patronRequest.phoneNumber());
         verify(userMapper).toEntity(patronRequest);
@@ -272,14 +266,12 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when creating user with existing email")
     void shouldThrowExceptionWhenCreatingUserWithExistingEmail() {
-        // Arrange
+
         when(userRepository.existsByEmail(testUserCreateRequest.email())).thenReturn(true);
         when(userMapper.toEntity(testUserCreateRequest)).thenReturn(librarianUser);
 
-        // Act & Assert
         assertThrows(ResourceAlreadyExistException.class, () -> userService.createPatronUser(testUserCreateRequest));
 
-        // Verify
         verify(userRepository).existsByEmail(testUserCreateRequest.email());
         verify(userRepository, never()).existsByPhoneNumber(anyString());
         verify(userRepository, never()).save(any(User.class));
@@ -288,15 +280,13 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when creating user with existing phone number")
     void shouldThrowExceptionWhenCreatingUserWithExistingPhoneNumber() {
-        // Arrange
+
         when(userRepository.existsByEmail(testUserCreateRequest.email())).thenReturn(false);
         when(userRepository.existsByPhoneNumber(testUserCreateRequest.phoneNumber())).thenReturn(true);
         when(userMapper.toEntity(testUserCreateRequest)).thenReturn(librarianUser); // Use librarian user to match phone
 
-        // Act & Assert
         assertThrows(ResourceAlreadyExistException.class, () -> userService.createPatronUser(testUserCreateRequest));
 
-        // Verify
         verify(userRepository).existsByEmail(testUserCreateRequest.email());
         verify(userRepository).existsByPhoneNumber(testUserCreateRequest.phoneNumber());
         verify(userRepository, never()).save(any(User.class));
@@ -305,14 +295,12 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should get user by ID successfully")
     void shouldGetUserById() {
-        // Arrange
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userMapper.toResponse(testUser)).thenReturn(testUserResponse);
 
-        // Act
         UserResponse response = userService.getUserById(1L);
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUserResponse.id(), response.id());
         assertEquals(testUserResponse.email(), response.email());
@@ -325,13 +313,11 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when user not found by ID")
     void shouldThrowExceptionWhenUserNotFoundById() {
-        // Arrange
+
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(999L));
 
-        // Verify
         verify(userRepository).findById(999L);
         verify(userMapper, never()).toResponse(any(User.class));
     }
@@ -339,19 +325,16 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should get all active users")
     void shouldGetAllActiveUsers() {
-        // Arrange
+
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         when(userRepository.findByDeletedFalse(pageable)).thenReturn(userPage);
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
-        // Act
         Page<UserResponse> response = userService.getAllActiveUsers(0, 10, "id");
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUsers.size(), response.getTotalElements());
 
-        // Verify
         verify(userRepository).findByDeletedFalse(pageable);
         verify(userMapper, times(testUsers.size())).toResponse(any(User.class));
     }
@@ -359,19 +342,16 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should get all users including deleted")
     void shouldGetAllUsersIncludingDeleted() {
-        // Arrange
+
         Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
         when(userRepository.findAll(pageable)).thenReturn(userPage);
         when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
-        // Act
         Page<UserResponse> response = userService.getAllUsersIncludingDeleted(0, 10, "id");
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUsers.size(), response.getTotalElements());
 
-        // Verify
         verify(userRepository).findAll(pageable);
         verify(userMapper, times(testUsers.size())).toResponse(any(User.class));
     }
@@ -379,20 +359,17 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should update user successfully")
     void shouldUpdateUser() {
-        // Arrange
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         when(userMapper.toUpdateResponse(testUser)).thenReturn(testUserUpdateResponse);
         doNothing().when(userMapper).updateEntity(any(UserUpdateRequest.class), any(User.class));
 
-        // Act
         UserUpdateResponse response = userService.updateUser(1L, testUserUpdateRequest);
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUserUpdateResponse.id(), response.id());
 
-        // Verify
         verify(userRepository).findById(1L);
         verify(userMapper).updateEntity(testUserUpdateRequest, testUser);
         verify(userRepository).save(testUser);
@@ -402,13 +379,11 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when updating non-existent user")
     void shouldThrowExceptionWhenUpdatingNonExistentUser() {
-        // Arrange
+
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(999L, testUserUpdateRequest));
 
-        // Verify
         verify(userRepository).findById(999L);
         verify(userMapper, never()).updateEntity(any(), any());
         verify(userRepository, never()).save(any());
@@ -417,29 +392,24 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should soft delete user successfully")
     void shouldSoftDeleteUser() {
-        // Arrange
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         when(userMapper.toResponse(testUser)).thenReturn(testUserResponse);
 
-        // Mock the borrowing repository to return an empty page
         when(borrowingRepository.findByUserIdAndStatus(
                 eq(1L), eq(BorrowingStatus.ACTIVE), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
-        // Act
         UserResponse response = userService.deleteUser(1L, "admin");
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUserResponse.id(), response.id());
 
-        // Verify
         verify(userRepository).findById(1L);
         verify(userRepository).save(testUser);
         verify(userMapper).toResponse(testUser);
 
-        // Additional verification for proper deletion
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
@@ -451,23 +421,19 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should hard delete user successfully")
     void shouldHardDeleteUser() {
-        // Arrange
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userMapper.toResponse(testUser)).thenReturn(testUserResponse);
 
-        // Mock any active borrowings that might be checked
         when(borrowingRepository.findByUserIdAndStatus(
                 eq(1L), eq(BorrowingStatus.ACTIVE), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
-        // Act
         UserResponse response = userService.hardDeleteUser(1L, "admin");
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUserResponse.id(), response.id());
 
-        // Verify
         verify(userRepository).findById(1L);
         verify(userRepository).delete(testUser);
         verify(userMapper).toResponse(testUser);
@@ -476,29 +442,25 @@ class UserServiceUnitTest {
     @Test
     @DisplayName("Should update user status successfully")
     void shouldUpdateUserStatus() {
-        // Arrange
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         when(userMapper.toUpdateResponse(testUser)).thenReturn(testUserUpdateResponse);
 
-        // Act
         UserUpdateResponse response = userService.updateUserStatus(1L, "SUSPENDED");
 
-        // Assert
         assertNotNull(response);
         assertEquals(testUserUpdateResponse.id(), response.id());
 
-        // Verify
         verify(userRepository).findById(1L);
         verify(userRepository).save(testUser);
         verify(userMapper).toUpdateResponse(testUser);
 
-        // Check that status was updated
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
         assertEquals(UserStatus.SUSPENDED, savedUser.getStatus());
     }
 
-    // Other tests remain the same...
+
 }

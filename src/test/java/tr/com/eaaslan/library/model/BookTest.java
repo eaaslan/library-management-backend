@@ -108,10 +108,8 @@ class BookTest {
             Book invalidBook,
             String expectedErrorMessage) {
 
-        // When
         Set<ConstraintViolation<Book>> violations = validator.validate(invalidBook);
 
-        // Then
         assertFalse(violations.isEmpty(),
                 testCase + " should have validation violations");
 
@@ -125,7 +123,7 @@ class BookTest {
 
     private static Stream<Arguments> provideBooksWithValidationErrors() {
         return Stream.of(
-                // Blank title case
+
                 Arguments.of(
                         "Book with blank title",
                         Book.builder()
@@ -139,7 +137,7 @@ class BookTest {
                         "Title is required"
                 ),
 
-                // Null genre case
+
                 Arguments.of(
                         "Book with null genre",
                         Book.builder()
@@ -153,7 +151,6 @@ class BookTest {
                         "Genre is required"
                 ),
 
-                // Future publication year case
                 Arguments.of(
                         "Book with future publication year",
                         Book.builder()

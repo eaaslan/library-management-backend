@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Import(TestJpaConfig.class)
 class UserRepositoryTest {
-    
+
     @Autowired
     private UserRepository userRepository;
 
@@ -117,7 +117,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Should find users with suspended status and past end date")
     void shouldFindUsersWithSuspendedStatusAndPastEndDate() {
-        // Create a user with suspension that has ended
+
         User pastSuspension = User.builder()
                 .email("past@library.com")
                 .password("password")

@@ -32,7 +32,7 @@ class BorrowingTest {
 
     @BeforeEach
     void setUp() {
-        // Set up test user
+
         testUser = User.builder()
                 .email("test@example.com")
                 .password("password123")
@@ -43,7 +43,6 @@ class BorrowingTest {
                 .status(UserStatus.ACTIVE)
                 .build();
 
-        // Set up test book
         testBook = Book.builder()
                 .isbn("1234567890")
                 .title("Test Book")
@@ -267,7 +266,7 @@ class BorrowingTest {
         LocalDate today = LocalDate.now();
 
         return Stream.of(
-                // testName, borrowDate, dueDate, returnDate, status, expectedIsOverdue
+
                 Arguments.of(
                         "Active with future due date",
                         today.minusDays(7),

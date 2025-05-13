@@ -32,7 +32,7 @@ class BorrowingPdfExportServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Create sample borrowing data for testing
+
         sampleBorrowings = createSampleBorrowings();
         emptyBorrowings = new ArrayList<>();
     }
@@ -40,13 +40,11 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export all borrowings to PDF successfully")
     void shouldExportAllBorrowingsToPdfSuccessfully() {
-        // Given
+
         when(borrowingService.getAllBorrowingsForExport()).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportAllBorrowingsToPdf();
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getAllBorrowingsForExport();
@@ -55,13 +53,11 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should handle empty borrowings list gracefully")
     void shouldHandleEmptyBorrowingsListGracefully() {
-        // Given
+
         when(borrowingService.getAllBorrowingsForExport()).thenReturn(emptyBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportAllBorrowingsToPdf();
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getAllBorrowingsForExport();
@@ -70,14 +66,12 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export user borrowings to PDF successfully")
     void shouldExportUserBorrowingsToPdf() {
-        // Given
+
         Long userId = 1L;
         when(borrowingService.getBorrowingsByUserForExport(userId)).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportUserBorrowingsToPdf(userId);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getBorrowingsByUserForExport(userId);
@@ -86,13 +80,11 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export overdue borrowings to PDF successfully")
     void shouldExportOverdueBorrowingsToPdf() {
-        // Given
+
         when(borrowingService.getOverdueBorrowingsForExport()).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportOverdueBorrowingsToPdf();
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getOverdueBorrowingsForExport();
@@ -101,14 +93,12 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export book borrowings to PDF successfully")
     void shouldExportBookBorrowingsToPdf() {
-        // Given
+
         Long bookId = 1L;
         when(borrowingService.getBorrowingsByBookForExport(bookId)).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportBookBorrowingsToPdf(bookId);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getBorrowingsByBookForExport(bookId);
@@ -117,15 +107,13 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export borrowings by date range to PDF successfully")
     void shouldExportBorrowingsByDateRangeToPdf() {
-        // Given
+
         LocalDate startDate = LocalDate.of(2023, 1, 1);
         LocalDate endDate = LocalDate.of(2023, 12, 31);
         when(borrowingService.getBorrowingsByDateRangeForExport(startDate, endDate)).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportBorrowingsByDateRangeToPdf(startDate, endDate);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getBorrowingsByDateRangeForExport(startDate, endDate);
@@ -134,13 +122,11 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should export with null dates successfully")
     void shouldExportWithNullDatesSuccessfully() {
-        // Given
+
         when(borrowingService.getBorrowingsByDateRangeForExport(null, null)).thenReturn(sampleBorrowings);
 
-        // When
         byte[] result = pdfExportService.exportBorrowingsByDateRangeToPdf(null, null);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.length > 0);
         verify(borrowingService, times(1)).getBorrowingsByDateRangeForExport(null, null);
@@ -149,10 +135,9 @@ class BorrowingPdfExportServiceTest {
     @Test
     @DisplayName("Should throw exception when borrowing service throws exception")
     void shouldThrowExceptionWhenServiceThrowsException() {
-        // Given
+
         when(borrowingService.getAllBorrowingsForExport()).thenThrow(new RuntimeException("Database error"));
 
-        // When & Then
         assertThrows(RuntimeException.class, () -> pdfExportService.exportAllBorrowingsToPdf());
         verify(borrowingService, times(1)).getAllBorrowingsForExport();
     }

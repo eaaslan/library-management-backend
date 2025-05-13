@@ -52,7 +52,7 @@ class AuthControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should register a new user successfully")
     void shouldRegisterUserSuccessfully() throws Exception {
-        // Arrange
+
         UserCreateRequest registerRequest = new UserCreateRequest(
                 "newuser@test.com",
                 "password123",
@@ -62,7 +62,7 @@ class AuthControllerTest extends AbstractControllerTest {
                 "123 Main St"
         );
 
-        // Act & Assert
+
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ class AuthControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return 409 Conflict when registering with existing email")
     void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
-        // Arrange - Create a user first
+
         UserCreateRequest initialUser = new UserCreateRequest(
                 "existing@test.com",
                 "password123",
@@ -88,14 +88,12 @@ class AuthControllerTest extends AbstractControllerTest {
                 "123 Main St"
         );
 
-        // Register the user first
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(initialUser)))
                 .andExpect(status().isCreated());
 
-        // Try to register with the same email
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +106,7 @@ class AuthControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should login successfully with valid credentials")
     void shouldLoginSuccessfullyWithValidCredentials() throws Exception {
-        // Arrange - Create a user first
+
         UserCreateRequest userRequest = new UserCreateRequest(
                 "login@test.com",
                 "securePass",
@@ -118,14 +116,12 @@ class AuthControllerTest extends AbstractControllerTest {
                 "123 Main St"
         );
 
-        // Register the user
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated());
 
-        // Login attempt
         LoginRequest loginReq = new LoginRequest("login@test.com", "securePass");
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -142,7 +138,7 @@ class AuthControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return 401 Unauthorized when credentials are invalid")
     void shouldReturnUnauthorizedForInvalidCredentials() throws Exception {
-        // Arrange - Create a user first
+
         UserCreateRequest userRequest = new UserCreateRequest(
                 "auth@test.com",
                 "correctPass",
@@ -152,14 +148,12 @@ class AuthControllerTest extends AbstractControllerTest {
                 "123 Main St"
         );
 
-        // Register the user
         mockMvc.perform(post("/api/v1/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated());
 
-        // Wrong login attempt
         LoginRequest loginReq = new LoginRequest("auth@test.com", "wrongPass");
 
         mockMvc.perform(post("/api/v1/auth/login")

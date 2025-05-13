@@ -34,23 +34,22 @@ class BorrowingIntegrationTest {
     @Test
     @DisplayName("Should prevent suspended users from borrowing books")
     void shouldPreventSuspendedUsersFromBorrowingBooks() {
-        // Benzersiz bir telefon numarası oluştur
+
         String uniquePhoneNumber = "05524323465";
 
-        // Askıya alınmış bir kullanıcı oluştur
         User suspendedUser = User.builder()
                 .email("suspended-test@example.com")
                 .password("password")
                 .firstName("Suspended")
                 .lastName("User")
-                .phoneNumber(uniquePhoneNumber)  // Benzersiz telefon numarası kullan
+                .phoneNumber(uniquePhoneNumber)
                 .role(UserRole.PATRON)
                 .status(UserStatus.SUSPENDED)
                 .suspensionEndDate(LocalDate.now().plusDays(7))
                 .build();
         userRepository.save(suspendedUser);
 
-        // Benzersiz ISBN ile kitap oluştur
+
         Book book = Book.builder()
                 .isbn("TEST" + UUID.randomUUID().toString().substring(0, 8))
                 .title("Test Book")
@@ -63,10 +62,8 @@ class BorrowingIntegrationTest {
                 .build();
         bookRepository.save(book);
 
-        // Ödünç alma isteği oluştur
         BorrowingCreateRequest request = new BorrowingCreateRequest(book.getId(), null, null);
 
-        // Askıya alınmış kullanıcının kitap ödünç alamadığını doğrula
         assertThrows(UserSuspendedException.class, () -> {
             borrowingService.borrowBook(request, suspendedUser.getEmail());
         });

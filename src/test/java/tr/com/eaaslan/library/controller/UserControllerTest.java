@@ -43,7 +43,7 @@ class UserControllerTest extends AbstractControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Clear user database before each test
+
         userRepository.deleteAll();
     }
 
@@ -51,11 +51,11 @@ class UserControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("User creation should be successful")
     void createUser_Success() throws Exception {
-        // Test data
+
         UserCreateRequest createRequest = new UserCreateRequest(
                 "test@example.com", "password123", "Test", "User", "05501234567", "Test Address");
 
-        // API request and validation - now using real service call instead of mock
+
         mockMvc.perform(post("/api/v1/users")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,7 +71,7 @@ class UserControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "ADMIN")
     @DisplayName("Should not create user with existing email")
     void shouldNotCreateUserWithExistingEmail() throws Exception {
-        // Create first user
+
         UserCreateRequest firstUser = new UserCreateRequest(
                 "duplicate@example.com", "password123", "First", "User", "05501234568", "Test Address");
 
@@ -81,7 +81,6 @@ class UserControllerTest extends AbstractControllerTest {
                         .content(objectMapper.writeValueAsString(firstUser)))
                 .andExpect(status().isCreated());
 
-        // Try to create second user with the same email
         UserCreateRequest duplicateUser = new UserCreateRequest(
                 "duplicate@example.com", "password456", "Second", "User", "05501234569", "Another Address");
 
@@ -97,11 +96,11 @@ class UserControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "LIBRARIAN")
     @DisplayName("User with Librarian role should be able to create a librarian")
     void librarianShouldCreateLibrarianUser() throws Exception {
-        // Test data
+
         UserCreateRequest createRequest = new UserCreateRequest(
                 "librarian@example.com", "password123", "New", "Librarian", "05501234570", "Test Address");
 
-        // API request and validation
+
         mockMvc.perform(post("/api/v1/users/librarians")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,11 +115,10 @@ class UserControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "PATRON")
     @DisplayName("User with Patron role should not be able to create a librarian")
     void patronShouldNotCreateLibrarianUser() throws Exception {
-        // Test data
+
         UserCreateRequest createRequest = new UserCreateRequest(
                 "librarian2@example.com", "password123", "Blocked", "Librarian", "05501234571", "Test Address");
 
-        // API request and validation
         mockMvc.perform(post("/api/v1/users/librarians")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

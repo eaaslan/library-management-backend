@@ -77,7 +77,6 @@ class BorrowingControllerTest extends AbstractControllerTest {
 
         when(borrowingService.borrowBook(any(), anyString())).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/borrowings")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +92,7 @@ class BorrowingControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should get user's borrowings")
     void shouldGetUserBorrowings() throws Exception {
-        // Arrange
+
         List<BorrowingResponse> borrowings = List.of(
                 new BorrowingResponse(
                         1L, 1L, "user@example.com", "User Name",
@@ -115,7 +114,6 @@ class BorrowingControllerTest extends AbstractControllerTest {
         when(borrowingService.getBorrowingsByCurrentUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(page);
 
-        // Act & Assert
         mockMvc.perform(get("/api/v1/borrowings/my-borrowings")
                         .param("page", "0")
                         .param("size", "10"))
@@ -131,7 +129,7 @@ class BorrowingControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should get borrowing by ID")
     void shouldGetBorrowingById() throws Exception {
-        // Arrange
+
         BorrowingResponse response = new BorrowingResponse(
                 1L, 1L, "user@example.com", "User Name",
                 1L, "Book Title", "1234567890",
@@ -142,7 +140,6 @@ class BorrowingControllerTest extends AbstractControllerTest {
         when(securityService.isCurrentUserBorrowing(anyLong())).thenReturn(true);
         when(borrowingService.getBorrowingById(anyLong())).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(get("/api/v1/borrowings/1"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -155,7 +152,7 @@ class BorrowingControllerTest extends AbstractControllerTest {
     @Test
     @DisplayName("Should return a book successfully")
     void shouldReturnBookSuccessfully() throws Exception {
-        // Arrange
+
         BorrowingReturnRequest request = new BorrowingReturnRequest(LocalDate.now());
 
         BorrowingResponse response = new BorrowingResponse(
@@ -172,7 +169,6 @@ class BorrowingControllerTest extends AbstractControllerTest {
 
         when(borrowingService.returnBook(anyLong(), any(), anyString())).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(put("/api/v1/borrowings/1/return")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

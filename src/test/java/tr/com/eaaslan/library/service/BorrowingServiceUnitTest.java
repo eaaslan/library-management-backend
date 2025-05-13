@@ -59,7 +59,7 @@ class BorrowingServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize test data
+
         activeUser = User.builder()
                 .email("user@example.com")
                 .status(UserStatus.ACTIVE)
@@ -321,15 +321,12 @@ class BorrowingServiceUnitTest {
                 .thenReturn(borrowingsPage);
         when(borrowingMapper.toResponse(activeBorrowing)).thenReturn(borrowingResponse);
 
-        // Act
         Page<BorrowingResponse> response = borrowingService.getBorrowingsByCurrentUser(activeUser.getEmail(), 0, 10);
 
-        // Assert
         assertNotNull(response);
         assertEquals(1, response.getTotalElements());
         assertEquals(borrowingResponse, response.getContent().getFirst());
 
-        // Verify
         verify(userRepository).findByEmail(activeUser.getEmail());
         verify(borrowingRepository).findByUserId(eq(activeUser.getId()), any(Pageable.class));
     }
@@ -346,15 +343,12 @@ class BorrowingServiceUnitTest {
                 .thenReturn(borrowingsPage);
         when(borrowingMapper.toResponse(activeBorrowing)).thenReturn(borrowingResponse);
 
-        // Act
         Page<BorrowingResponse> response = borrowingService.getBorrowingsByBook(availableBook.getId(), 0, 10);
 
-        // Assert
         assertNotNull(response);
         assertEquals(1, response.getTotalElements());
         assertEquals(borrowingResponse, response.getContent().get(0));
 
-        // Verify
         verify(bookRepository).findById(availableBook.getId());
         verify(borrowingRepository).findByBookId(eq(availableBook.getId()), any(Pageable.class));
     }
@@ -362,7 +356,7 @@ class BorrowingServiceUnitTest {
     @Test
     @DisplayName("Should get overdue borrowings")
     void shouldGetOverdueBorrowings() {
-        // Arrange
+
         Pageable pageable = PageRequest.of(0, 10);
         Page<Borrowing> borrowingsPage = new PageImpl<>(List.of(overdueBorrowing));
 
@@ -370,35 +364,29 @@ class BorrowingServiceUnitTest {
                 .thenReturn(borrowingsPage);
         when(borrowingMapper.toResponse(overdueBorrowing)).thenReturn(borrowingResponse);
 
-        // Act
         Page<BorrowingResponse> response = borrowingService.getOverdueBorrowings(0, 10);
 
-        // Assert
         assertNotNull(response);
         assertEquals(1, response.getTotalElements());
         assertEquals(borrowingResponse, response.getContent().get(0));
 
-        // Verify
         verify(borrowingRepository).findOverdueBorrowings(any(LocalDateTime.class), any(Pageable.class));
     }
 
     @Test
     @DisplayName("Should get borrowing by id")
     void shouldGetBorrowingById() {
-        // Arrange
+
         when(borrowingRepository.findById(activeBorrowing.getId())).thenReturn(Optional.of(activeBorrowing));
         when(borrowingMapper.toResponse(activeBorrowing)).thenReturn(borrowingResponse);
 
-        // Act
         BorrowingResponse response = borrowingService.getBorrowingById(activeBorrowing.getId());
 
-        // Assert
         assertNotNull(response);
         assertEquals(borrowingResponse.id(), response.id());
         assertEquals(borrowingResponse.bookTitle(), response.bookTitle());
         assertEquals(borrowingResponse.userEmail(), response.userEmail());
 
-        // Verify
         verify(borrowingRepository).findById(activeBorrowing.getId());
         verify(borrowingMapper).toResponse(activeBorrowing);
     }
@@ -406,14 +394,12 @@ class BorrowingServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when borrowing not found by id")
     void shouldThrowExceptionWhenBorrowingNotFoundById() {
-        // Arrange
+
         Long nonExistentId = 999L;
         when(borrowingRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> borrowingService.getBorrowingById(nonExistentId));
 
-        // Verify
         verify(borrowingRepository).findById(nonExistentId);
         verify(borrowingMapper, never()).toResponse(any());
     }
@@ -421,7 +407,7 @@ class BorrowingServiceUnitTest {
     @Test
     @DisplayName("Should update overdue status for borrowings")
     void shouldUpdateOverdueStatusForBorrowings() {
-        // Arrange
+
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         LocalDate today = LocalDate.now();
 
@@ -440,10 +426,8 @@ class BorrowingServiceUnitTest {
                 .thenReturn(activeBorrowingsPage);
         when(borrowingRepository.saveAll(anyList())).thenReturn(List.of(overdueBorrowing));
 
-        // Act
         borrowingService.updateOverdueStatus();
 
-        // Assert - We can verify that the saveAll method was called
         verify(borrowingRepository).findByStatus(eq(BorrowingStatus.ACTIVE), any(Pageable.class));
         verify(borrowingRepository).saveAll(anyList());
     }
@@ -451,16 +435,14 @@ class BorrowingServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when user has exceeded borrowing limit")
     void shouldThrowExceptionWhenUserHasExceededBorrowingLimit() {
-        // Arrange
+
         when(userRepository.findByEmail(activeUser.getEmail())).thenReturn(Optional.of(activeUser));
         when(borrowingRepository.countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE))
                 .thenReturn((long) activeUser.getMaxAllowedBorrows());
 
-        // Act & Assert
         assertThrows(BorrowingLimitExceededException.class,
                 () -> borrowingService.borrowBook(createRequest, activeUser.getEmail()));
 
-        // Verify
         verify(userRepository).findByEmail(activeUser.getEmail());
         verify(borrowingRepository).countByUserIdAndStatus(activeUser.getId(), BorrowingStatus.ACTIVE);
         verify(bookRepository, never()).findById(any());

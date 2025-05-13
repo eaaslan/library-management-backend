@@ -232,10 +232,8 @@ class BorrowingRepositoryTest {
         LocalDate latestActiveUserActivity = borrowingRepository.findLatestActivityDateByUserId(activeUser.getId());
         LocalDate latestSecondUserActivity = borrowingRepository.findLatestActivityDateByUserId(secondUser.getId());
 
-        // The latest activity for active user is the borrow date of activeBorrowing (today - 5 days)
         assertEquals(LocalDate.now().minusDays(5), latestActiveUserActivity);
 
-        // The latest activity for second user is the borrow date of returnedBorrowing (today - 20 days)
         assertEquals(LocalDate.now().minusDays(20), latestSecondUserActivity);
     }
 
@@ -318,13 +316,10 @@ class BorrowingRepositoryTest {
                 .status(BorrowingStatus.ACTIVE)
                 .build();
 
-        // Save the borrowing
         Borrowing savedBorrowing = borrowingRepository.save(newBorrowing);
 
-        // Check the saved borrowing has an ID
         assertNotNull(savedBorrowing.getId(), "Saved borrowing should have an ID");
 
-        // Retrieve the borrowing and verify its properties
         Borrowing retrievedBorrowing = borrowingRepository.findById(savedBorrowing.getId()).orElse(null);
         assertNotNull(retrievedBorrowing, "Should be able to retrieve the saved borrowing");
         assertEquals(activeUser.getId(), retrievedBorrowing.getUser().getId(), "User should match");
