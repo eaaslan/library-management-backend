@@ -37,9 +37,5 @@ public enum Genre {
     REFERENCE,
     TEXTBOOK,
     OTHER
-
-//    @JsonValue
-//    public String toDisplayName(){
-//        return WordUtils.toTitleCase(this.name());
-//    }
+    
 }

@@ -17,7 +17,6 @@ public interface UserService {
     Page<UserResponse> getAllUsersIncludingDeleted(int page, int size, String sortBy);
 
     Page<UserResponse> getAllActiveUsers(int page, int size, String sortBy);
-    
 
     UserUpdateResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
 

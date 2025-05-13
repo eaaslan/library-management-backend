@@ -15,9 +15,9 @@ import tr.com.eaaslan.library.model.Book;
 import tr.com.eaaslan.library.model.Borrowing;
 import tr.com.eaaslan.library.model.BorrowingStatus;
 import tr.com.eaaslan.library.model.Genre;
-import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.Book.BookResponse;
-import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookResponse;
+import tr.com.eaaslan.library.model.dto.book.BookUpdateRequest;
 import tr.com.eaaslan.library.model.mapper.BookMapper;
 import tr.com.eaaslan.library.repository.BookRepository;
 import tr.com.eaaslan.library.repository.BorrowingRepository;
@@ -59,7 +59,6 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toResponse(book);
     }
 
-    //todo create specific exception
     @Override
     @Transactional(readOnly = true)
     public BookResponse getBookByIsbn(String isbn) {
@@ -93,7 +92,6 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "ID", id));
 
-        // Check if there are any active borrowings for this book
         List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndStatus(id, BorrowingStatus.ACTIVE);
 
         if (!activeBorrowings.isEmpty()) {

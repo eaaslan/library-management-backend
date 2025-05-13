@@ -9,8 +9,6 @@ import tr.com.eaaslan.library.model.Genre;
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
-    //TODO , JpaSpecificationExecutor<Book>
-
     Optional<Book> findByIsbn(String isbn);
 
     Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);

@@ -15,9 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
-import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.Book.BookResponse;
-import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookResponse;
+import tr.com.eaaslan.library.model.dto.book.BookUpdateRequest;
 import tr.com.eaaslan.library.service.BookService;
 
 import java.util.List;

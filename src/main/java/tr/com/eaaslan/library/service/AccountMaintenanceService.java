@@ -40,15 +40,12 @@ public class AccountMaintenanceService {
         List<User> usersToDelete = new ArrayList<>();
 
         for (User user : activeUsers) {
-            // Skip admin and librarian accounts
             if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.LIBRARIAN) {
                 continue;
             }
 
-            // Check latest activity date
             LocalDate lastActivity = borrowingRepository.findLatestActivityDateByUserId(user.getId());
 
-            // If no activity found or last activity older than one month
             if (lastActivity == null || lastActivity.isBefore(oneMonthAgo)) {
                 user.setStatus(UserStatus.DELETED);
                 user.setDeleted(true);
@@ -57,6 +54,7 @@ public class AccountMaintenanceService {
                 usersToDelete.add(user);
 
                 log.info("User marked as deleted due to inactivity: {}", user.getEmail());
+                //todo send notification
                 // notificationService.sendAccountDeletionNotification(user);
             }
         }

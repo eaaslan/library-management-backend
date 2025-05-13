@@ -10,7 +10,7 @@ import tr.com.eaaslan.library.model.event.BookAvailabilityEvent;
 import tr.com.eaaslan.library.service.BookAvailabilityEventService;
 
 @RestController
-@RequestMapping("/books/availability")  // Removed /api/v1 prefix
+@RequestMapping("/books/availability")
 @RequiredArgsConstructor
 public class BookAvailabilityController {
 

@@ -44,9 +44,8 @@ public class UserServiceImpl implements UserService {
     public LibrarianCreateResponse createLibrarianUser(UserCreateRequest userCreateRequest) {
         User user = userMapper.toEntity(userCreateRequest);
 
-        // Explicitly set role and status for librarian registrations
         user.setRole(UserRole.LIBRARIAN);
-        user.setStatus(UserStatus.ACTIVE); // Librarians can be immediately active
+        user.setStatus(UserStatus.ACTIVE);
 
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ResourceAlreadyExistException("User", "email", user.getEmail());
@@ -123,7 +122,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse deleteUser(Long id, String userName) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
 
-        // Get both ACTIVE and OVERDUE borrowings
         List<Borrowing> activeBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.ACTIVE);
         List<Borrowing> overdueBorrowings = borrowingRepository.findByUserIdAndStatus(user.getId(), BorrowingStatus.OVERDUE);
 
@@ -197,7 +195,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", id));
 
-        // Get ALL borrowings for the user
         List<Borrowing> allBorrowings = borrowingRepository.findByUserId(user.getId(), Pageable.unpaged()).getContent();
 
         if (!allBorrowings.isEmpty()) {
@@ -212,15 +209,14 @@ public class UserServiceImpl implements UserService {
                     bookRepository.save(book);
                 }
             }
-
-            // Then delete all borrowings
+            
             borrowingRepository.deleteAll(allBorrowings);
         }
 
         userRepository.delete(user);
         return userMapper.toResponse(user);
     }
-    
+
 
     @Override
     @Transactional(readOnly = true)

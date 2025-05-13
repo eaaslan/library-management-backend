@@ -25,7 +25,6 @@ public class BorrowingController {
 
     private final BorrowingService borrowingService;
 
-    // endpoint responselari ozellestir ayni kulalnici aynici booku kiralamak isterse
     @Operation(
             summary = "Borrow a book",
             description = "The patron can borrow a book"

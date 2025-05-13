@@ -31,9 +31,7 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     void deleteByBookId(Long bookId);
 
-
     void deleteByUserId(Long userId);
-
 
     // Find overdue borrowings
     @Query("SELECT b FROM Borrowing b WHERE b.status = 'OVERDUE'")

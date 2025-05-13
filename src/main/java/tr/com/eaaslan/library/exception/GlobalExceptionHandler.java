@@ -140,8 +140,6 @@ public class GlobalExceptionHandler {
 
     // Helper method to extract field name from property path
     private String getFieldName(String propertyPath) {
-        // The property path might be something like "createBook.bookCreateRequest.isbn"
-        // We only want the last part, which is the field name
         String[] parts = propertyPath.split("\\.");
         return parts[parts.length - 1];
     }

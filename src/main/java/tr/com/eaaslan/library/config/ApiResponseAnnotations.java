@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tr.com.eaaslan.library.model.dto.ErrorResponse;
-import tr.com.eaaslan.library.model.dto.Book.BookResponse;
+import tr.com.eaaslan.library.model.dto.book.BookResponse;
 import tr.com.eaaslan.library.model.dto.auth.JwtAuthResponse;
 import tr.com.eaaslan.library.model.dto.borrowing.BorrowingResponse;
 import tr.com.eaaslan.library.model.dto.user.UserResponse;
@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 public final class ApiResponseAnnotations {
 
     private ApiResponseAnnotations() {
-        // Private constructor to prevent instantiation
     }
 
     /**

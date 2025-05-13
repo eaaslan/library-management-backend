@@ -50,7 +50,7 @@ public class PenaltyService {
                 log.info("User suspended for 2 weeks due to excessive late returns: {}", user.getEmail());
                 suspendedCount++;
 
-                // In a real system, you would send a notification here
+                // todo send notification
                 // notificationService.sendSuspensionNotification(user, "late returns", 14);
             }
         }

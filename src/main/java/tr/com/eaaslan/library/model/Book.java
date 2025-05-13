@@ -19,8 +19,6 @@ import java.time.Year;
 public class Book extends BaseEntity {
 
     @Column(name = "isbn", unique = true, nullable = false)
-//    @Pattern(regexp = "^(?=(?:\\D*\\d){10}(?:(?:\\D*\\d){3})?$)[\\d-]+$",
-//            message = "ISBN must be a valid 10 or 13-digit number, with optional hyphens")
     @Size(min = 10, max = 13, message = "ISBN must be between 10 and 13 characters")
     @NotBlank(message = "ISBN is required")
     private String isbn;

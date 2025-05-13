@@ -24,11 +24,10 @@ public class OpenAPIExamplesConfig {
         return (Operation operation, HandlerMethod handlerMethod) -> {
             String methodName = handlerMethod.getMethod().getName();
 
-            // Handle request body examples
             if (methodName.equals("login")) {
                 addLoginRequestExamples(operation);
             } else if (methodName.equals("createBook")) {
-                // We can add other request examples here
+
             }
 
             // Handle response examples

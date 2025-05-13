@@ -10,7 +10,6 @@ public record BorrowingCreateRequest(
         @NotNull(message = "Book ID is required")
         @Positive(message = "Book ID must be positive")
         Long bookId,
-
         
         LocalDate dueDate,
 

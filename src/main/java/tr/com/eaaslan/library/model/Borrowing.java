@@ -19,7 +19,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Borrowing extends BaseEntity {
 
-
     @Column(name = "borrow_date", nullable = false)
     @NotNull(message = "Borrow date is required")
     private LocalDate borrowDate;

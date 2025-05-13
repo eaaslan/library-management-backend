@@ -1,9 +1,9 @@
 package tr.com.eaaslan.library.service;
 
 import org.springframework.data.domain.Page;
-import tr.com.eaaslan.library.model.dto.Book.BookCreateRequest;
-import tr.com.eaaslan.library.model.dto.Book.BookResponse;
-import tr.com.eaaslan.library.model.dto.Book.BookUpdateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookCreateRequest;
+import tr.com.eaaslan.library.model.dto.book.BookResponse;
+import tr.com.eaaslan.library.model.dto.book.BookUpdateRequest;
 
 import java.util.List;
 

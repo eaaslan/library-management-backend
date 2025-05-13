@@ -42,7 +42,7 @@ public class AuthController {
             summary = "User login",
             description = "Authenticate user with email and password and return JWT token"
     )
-//    @LoginResponses
+
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest) {
@@ -50,7 +50,6 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtil.generateToken(authentication);
         LibraryUserDetails userDetails = (LibraryUserDetails) authentication.getPrincipal();
-
 
         JwtAuthResponse response = new JwtAuthResponse(
                 jwt,

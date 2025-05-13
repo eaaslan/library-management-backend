@@ -96,7 +96,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                 .user(currentUser)
                 .book(book)
                 .borrowDate(today)
-                .dueDate(dueDate) // Using the validated due date
+                .dueDate(dueDate)
                 .status(BorrowingStatus.ACTIVE)
                 .build();
 

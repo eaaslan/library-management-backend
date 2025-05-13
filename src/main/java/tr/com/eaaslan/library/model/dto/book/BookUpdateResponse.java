@@ -1,9 +1,9 @@
-package tr.com.eaaslan.library.model.dto.Book;
+package tr.com.eaaslan.library.model.dto.book;
 
 import java.time.LocalDateTime;
 
 public record BookUpdateResponse(
-        Long id,                // System-generated ID
+        Long id,
         String isbn,
         String title,
         String author,
@@ -13,10 +13,10 @@ public record BookUpdateResponse(
         String imageUrl,
         String description,
         int quantity,
-        boolean available,      // Derived field
-        LocalDateTime createdAt, // Audit information
-        String createdBy,        // Audit information
-        LocalDateTime updatedAt, // Audit information
+        boolean available,
+        LocalDateTime createdAt,
+        String createdBy,
+        LocalDateTime updatedAt,
         String updatedBy
 
 ) {

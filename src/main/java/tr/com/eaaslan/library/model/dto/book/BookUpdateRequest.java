@@ -1,4 +1,4 @@
-package tr.com.eaaslan.library.model.dto.Book;
+package tr.com.eaaslan.library.model.dto.book;
 
 public record BookUpdateRequest(
 
