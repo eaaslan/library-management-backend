@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Profile("dev-token")
+@Profile("dev")
 public class JwtTokenGenerator {
 
     @Value("${spring.jwt.secret:defaultsecretkeyforlibraryapplicationdevelopment}")
@@ -65,6 +65,12 @@ public class JwtTokenGenerator {
             String deleted = generatePermanentToken(key, "deleted@library.com", "ROLE_PATRON");
             log.info("\nPERMANENT deleted@library.com TOKEN FOR TESTING:");
             log.info(deleted);
+            log.info("==================================================\n");
+
+            // Generate pre-patron token
+            String patron3 = generatePermanentToken(key, "patron3@library.com", "ROLE_PATRON");
+            log.info("\nPERMANENT patron3@library.com TOKEN FOR TESTING:");
+            log.info(patron3);
             log.info("==================================================\n");
 
 

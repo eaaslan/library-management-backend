@@ -119,6 +119,22 @@ public class DummyDataInitializer implements CommandLineRunner {
             log.info("Second active patron created: {}", patron2.getEmail());
         }
 
+        // Third Active Patron
+        if (!userRepository.existsByEmail("patron3@library.com")) {
+            User patron3 = User.builder()
+                    .email("patron3@library.com")
+                    .password(passwordEncoder.encode("patron123"))
+                    .firstName("Third")
+                    .lastName("Patron")
+                    .phoneNumber("05951934563")
+                    .role(UserRole.PATRON)
+                    .status(UserStatus.ACTIVE)
+                    .maxAllowedBorrows(3)
+                    .build();
+            userRepository.save(patron3);
+            log.info("Third active patron created: {}", patron3.getEmail());
+        }
+
         // Pending User
         if (!userRepository.existsByEmail("pending@library.com")) {
             User pendingUser = User.builder()
@@ -350,6 +366,7 @@ public class DummyDataInitializer implements CommandLineRunner {
             decrementBookQuantity(bookId);
         }
 
+
         // Suspended User with 2 active borrowings and 1 overdue
         for (int i = 0; i < 2; i++) {
             Long bookId2 = getRandomAvailableBookId(bookIds);
@@ -369,6 +386,7 @@ public class DummyDataInitializer implements CommandLineRunner {
             borrowings.add(borrowing);
             decrementBookQuantity(bookId2);
         }
+
 
         // Overdue borrowing for suspended user
         Long bookId3 = getRandomAvailableBookId(bookIds);
