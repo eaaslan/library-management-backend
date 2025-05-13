@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tr.com.eaaslan.library.service.BorrowingPdfExportService;
 
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/export/borrowings")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class BorrowingPdfExportController {
 
     private final BorrowingPdfExportService borrowingPdfExportService;
